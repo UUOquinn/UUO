@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>生产环境</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=9.0-layout-v2">
+  <link rel="stylesheet" href="github-ui.css?v=1.7">
+  <script>
+    // ─── 测试环境 GitHub UI 1:1 ───
+    (function(){
+      if (location.port === '3001') {
+        document.documentElement.classList.add('github-ui');
+        document.title = '测试环境 · GitHub';
+        document.addEventListener('DOMContentLoaded', function () {
+          var settings = document.querySelector('.sidebar-settings');
+          if (settings) settings.open = true;
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="sidebar-brand-mark" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 16 16" fill="#1f2328"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        </span>
+        <div class="sidebar-brand-text">
+          <strong>联盟诊断</strong>
+          <span>Advertiser Funnel</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-group">
+          <div class="nav-label">工作台</div>
+          <button class="nav-item github-only-nav" data-view="home" type="button">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M6.906.664a.75.75 0 0 1 .188 1.04l-3.5 4.75a.75.75 0 0 1-1.204.09L.812 4.98a.75.75 0 0 1 .626-1.234h5.468ZM8 1a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0v-5.5A.75.75 0 0 1 8 1ZM3.75 9.75a.75.75 0 0 1 .75-.75h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1-.75-.75ZM6 12.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75Z"/></svg></span>
+            首页
+          </button>
+          <button class="nav-item active" data-view="diagnosis" type="button">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M.75 3h14.5a.75.75 0 0 1 .53 1.28l-5.89 5.89v2.59a.75.75 0 0 1-1.06.67l-2.5-1.25A.75.75 0 0 1 6 12.47V10.4L.22 4.28A.75.75 0 0 1 .75 3Zm1.06 1.5 4.72 4.72a.75.75 0 0 1 .22.53v2.08l1 .5V9.78a.75.75 0 0 1 .22-.53L13.19 4.5H1.81Z"/></svg></span>
+            漏斗诊断
+          </button>
+          <button class="nav-item" data-view="history" type="button">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg></span>
+            查询记录
+          </button>
+          <button class="nav-item disabled" type="button" title="即将上线">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25ZM6 4.75A.75.75 0 0 1 6.75 4h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 6 4.75Zm0 3A.75.75 0 0 1 6.75 7h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 6 7.75ZM6 11a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 6 11Z"/></svg></span>
+            数据集管理
+          </button>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-label">能力模块</div>
+          <button class="nav-item disabled" type="button" title="即将上线">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg></span>
+            CPM 排查
+          </button>
+          <button class="nav-item" data-view="strategy-audit" type="button">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg></span>
+            策略审核
+          </button>
+          <button class="nav-item" data-view="strategy-renewal" type="button">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg></span>
+            策略延期
+          </button>
+          <button class="nav-item" data-view="strategy-query" type="button">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg></span>
+            策略查询
+          </button>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <details class="sidebar-settings">
+          <summary>KwaiBI Cookie <span class="cookie-optional">（可选）</span></summary>
+          <div class="cookie-config">
+            <input id="kwabiCookieInput" type="text" placeholder="留空则使用服务端共享 Cookie">
+            <div class="cookie-actions">
+              <button id="kwabiCookieSave" class="btn-sm" type="button">保存</button>
+              <button id="kwabiCookieTest" class="btn-sm btn-sm-primary" type="button">验证</button>
+              <span id="kwabiCookieStatus" class="cookie-status">检查中…</span>
+            </div>
+            <div class="cookie-tip">默认使用服务端共享 Cookie。个人覆盖请从 DevTools 复制后粘贴。</div>
+          </div>
+        </details>
+      </div>
+    </aside>
+
+    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-start">
+          <button id="sidebarToggle" class="sidebar-toggle" type="button" aria-label="打开导航菜单">
+            <span class="sidebar-toggle-bar"></span>
+            <span class="sidebar-toggle-bar"></span>
+            <span class="sidebar-toggle-bar"></span>
+          </button>
+          <div class="breadcrumb">
+            <span>工作台</span>
+            <span class="sep">/</span>
+            <span id="breadcrumbCurrent">漏斗诊断</span>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <span class="status-badge" id="statusBadge">口径模式</span>
+          <button id="resetBtn" class="btn-ghost" type="button">重置</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <section id="viewHome" class="view github-only-view hidden">
+          <div class="gh-home-shell">
+            <div class="gh-home-hero">
+              <div class="gh-home-mark" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 16 16" fill="#1f2328"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+              </div>
+              <h1 class="gh-home-title">有什么可以帮你？</h1>
+              <p class="gh-home-subtitle">描述你的问题，自动路由到漏斗诊断、策略查询、审核或延期</p>
+            </div>
+
+            <div class="gh-home-composer-wrap">
+              <div class="gh-home-composer" id="homeComposer">
+                <textarea
+                  id="homeChatInput"
+                  class="gh-home-input"
+                  rows="3"
+                  placeholder="问我任何问题… 例如：今天某广告位有效请求率下降"
+                  autofocus
+                ></textarea>
+                <div class="gh-home-composer-footer">
+                  <div class="gh-home-feature-wrap">
+                    <span
+                      id="homeFeatureSelect"
+                      class="gh-home-feature"
+                      role="button"
+                      tabindex="0"
+                      aria-haspopup="listbox"
+                      aria-expanded="false"
+                      data-feature="auto"
+                    >
+                      <svg class="gh-home-feature-icon" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/><path d="M1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0ZM8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Z"/></svg>
+                      <span id="homeFeatureLabel" class="gh-home-feature-label">自动识别</span>
+                      <svg class="gh-home-feature-chevron" width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4.427 7.427 8 11l3.573-3.573A.25.25 0 0 0 11.427 7H4.573a.25.25 0 0 0-.177.427Z"/></svg>
+                    </span>
+                    <div id="homeFeatureMenu" class="gh-home-feature-menu" role="listbox" hidden>
+                      <button type="button" class="gh-home-feature-option is-active" role="option" data-feature="auto" data-label="自动识别">自动识别</button>
+                      <button type="button" class="gh-home-feature-option" role="option" data-feature="diagnosis" data-label="漏斗诊断">漏斗诊断</button>
+                      <button type="button" class="gh-home-feature-option" role="option" data-feature="strategy-query" data-label="策略查询">策略查询</button>
+                      <button type="button" class="gh-home-feature-option" role="option" data-feature="strategy-audit" data-label="策略审核">策略审核</button>
+                      <button type="button" class="gh-home-feature-option" role="option" data-feature="strategy-renewal" data-label="策略延期">策略延期</button>
+                    </div>
+                  </div>
+                  <button id="homeChatSend" class="gh-home-send" type="button" title="发送">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="viewDiagnosis" class="view active">
+          <div class="page-header">
+            <div>
+              <h1>漏斗诊断</h1>
+              <p>输入业务问题，自动查询真实数据并生成主漏斗对比与下钻方案</p>
+            </div>
+            <button id="generateBtn" class="btn-primary" type="button">生成诊断口径</button>
+          </div>
+
+          <div class="stats-row metrics-bar">
+            <div class="stat-card">
+              <div class="stat-label">主数据集</div>
+              <div class="stat-value" id="statMainDataset">85587 / 129496</div>
+              <div class="stat-desc">离线 / 实时主效果</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">下钻数据集</div>
+              <div class="stat-value" id="statDrillDataset">207512 / 103846</div>
+              <div class="stat-desc">过滤原因 / 召粗精漏斗</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">今日查询</div>
+              <div class="stat-value" id="statQueryCount">0</div>
+              <div class="stat-desc">本地记录</div>
+            </div>
+          </div>
+
+          <div class="workspace-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h2>诊断输入</h2>
+                <span class="panel-tip">支持自然语言描述</span>
+              </div>
+
+              <label class="field">
+                <span>诊断问题</span>
+                <textarea id="question" rows="3" placeholder="例如：今天某广告位有效请求率下降"></textarea>
+              </label>
+
+              <div class="form-grid">
+                <label class="field">
+                  <span>时间口径</span>
+                  <select id="dateMode">
+                    <option value="auto">自动识别</option>
+                    <option value="today">今天 / 实时</option>
+                    <option value="history">历史单日 / T-1</option>
+                    <option value="range">近 N 天</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>异常指标</span>
+                  <select id="anomalyMetric">
+                    <option value="auto">自动识别</option>
+                    <option value="联盟总消耗">联盟总消耗</option>
+                    <option value="有效请求率">有效请求率</option>
+                    <option value="广告填充率">广告填充率</option>
+                    <option value="有效填充率">有效填充率</option>
+                    <option value="曝光率">曝光率</option>
+                    <option value="CPM">CPM</option>
+                    <option value="CTR">CTR</option>
+                    <option value="CVR">CVR</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="section-title">筛选维度</div>
+              <div class="form-grid">
+                <label class="field">
+                  <span>uid</span>
+                  <input id="uid" type="text" placeholder="多个用逗号分隔">
+                </label>
+                <label class="field">
+                  <span>app_id</span>
+                  <input id="appId" type="text" placeholder="多个用逗号分隔">
+                </label>
+                <label class="field">
+                  <span>pos_id</span>
+                  <input id="posId" type="text" placeholder="多个用逗号分隔">
+                </label>
+                <label class="field">
+                  <span>ad_style</span>
+                  <input id="adStyle" type="text" placeholder="多个用逗号分隔">
+                </label>
+              </div>
+            </section>
+
+            <section class="panel result-panel">
+              <div class="panel-header">
+                <h2>诊断结果</h2>
+                <span class="panel-tip" id="resultStatus">等待生成</span>
+              </div>
+
+              <div id="resultEmpty" class="empty-state">
+                <div class="empty-icon">📋</div>
+                <h3>暂无诊断结果</h3>
+                <p>填写左侧问题后，系统将查询真实数据并输出主漏斗对比与下钻方案。</p>
+              </div>
+
+              <div id="resultContent" class="hidden"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="viewHistory" class="view hidden">
+          <div class="page-header">
+            <div>
+              <h1>查询记录</h1>
+              <p>本地保存最近 20 条诊断口径，便于复用与对比</p>
+            </div>
+            <button id="clearHistoryBtn" class="btn-ghost" type="button">清空记录</button>
+          </div>
+
+          <section class="panel">
+            <div id="historyList" class="history-list"></div>
+          </section>
+        </section>
+
+        <section id="viewStrategyQuery" class="view hidden">
+          <div class="agent-chat-shell">
+            <header class="agent-chat-header">
+              <div>
+                <h1>策略查询</h1>
+                <p>输入开发者ID、广告位ID 或 应用ID，返回匹配策略的全部字段</p>
+              </div>
+              <span id="strategyMetaBadge" class="strategy-meta-badge">加载中…</span>
+            </header>
+
+            <div id="strategyChatMessages" class="agent-chat-messages" aria-live="polite"></div>
+
+            <footer class="agent-chat-composer">
+              <textarea
+                id="strategyChatInput"
+                class="agent-chat-input"
+                rows="1"
+                placeholder="例如：广告位ID 5118002323，或 开发者ID 12345 应用ID 926500003"
+              ></textarea>
+              <button id="strategyChatSend" class="agent-send-btn" type="button" title="发送">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </footer>
+          </div>
+        </section>
+
+        <section id="viewStrategyAudit" class="view hidden">
+          <div class="agent-chat-shell">
+            <header class="agent-chat-header">
+              <div>
+                <h1>策略审核</h1>
+                <p>输入策略 ID 查看审核状态，支持批量查询与撤回操作</p>
+              </div>
+              <span id="auditMetaBadge" class="strategy-meta-badge">就绪</span>
+            </header>
+
+            <div id="auditChatMessages" class="agent-chat-messages" aria-live="polite">
+              <div class="agent-msg agent-msg-system">
+                <div class="agent-msg-bubble">
+                  <div class="agent-msg-content">
+                    <p>请输入策略 ID，支持以下操作：</p>
+                    <ul>
+                      <li>查询状态：<code>13938</code></li>
+                      <li>批量查询：<code>13938 14619 22856</code></li>
+                      <li>审核通过（待审核→待发布）：<code>通过 13938</code></li>
+                      <li>同意发布（待发布→已生效）：<code>发布 13938</code></li>
+                      <li>两步审核（审核通过+同意发布）：<code>审核 13938</code></li>
+                      <li>审核驳回：<code>驳回 13938</code></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <footer class="agent-chat-composer">
+              <textarea
+                id="auditChatInput"
+                class="agent-chat-input"
+                rows="1"
+                placeholder="输入策略ID查询状态，或「撤回 ID」执行撤回"
+              ></textarea>
+              <button id="auditChatSend" class="agent-send-btn" type="button" title="执行">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </footer>
+          </div>
+        </section>
+
+        <section id="viewStrategyRenewal" class="view hidden">
+          <div class="agent-chat-shell">
+            <header class="agent-chat-header">
+              <div>
+                <h1>策略延期</h1>
+                <p>输入定投策略 ID，批量将结束时间顺延 1 个月并自动提审</p>
+              </div>
+              <span id="renewalMetaBadge" class="strategy-meta-badge">就绪</span>
+            </header>
+
+            <div id="renewalChatMessages" class="agent-chat-messages" aria-live="polite">
+              <div class="agent-msg agent-msg-system">
+                <div class="agent-msg-bubble">
+                  <div class="agent-msg-content">
+                    <p>请输入需要延期的策略 ID，支持以下格式：</p>
+                    <ul>
+                      <li>单个 ID：<code>13938</code></li>
+                      <li>多个 ID：<code>13938 14619 22856</code></li>
+                      <li>粘贴到期提醒消息，自动提取 ID</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="agent-msg agent-msg-system">
+                <div class="agent-msg-bubble">
+                  <div class="agent-msg-content">
+                    <p class="flow-title">自动化执行流程 <span class="flow-hint">（对应 Orient 平台手动操作）</span></p>
+                    <ol class="flow-steps">
+                      <li>
+                        <span class="step-num">1</span>
+                        <span class="step-body">
+                          <span class="step-text">打开 <a href="https://operation-tool.corp.kuaishou.com/orient" target="_blank" rel="noopener">定投策略管理页</a></span>
+                          <span class="step-sub">operation-tool.corp.kuaishou.com/orient</span>
+                        </span>
+                      </li>
+                      <li>
+                        <span class="step-num">2</span>
+                        <span class="step-body">
+                          <span class="step-text">在「定投策略 ID」搜索框输入用户给的 ID，匹配策略任务</span>
+                          <span class="step-sub">本系统自动调用 GET /orientControl/get 定位策略</span>
+                        </span>
+                      </li>
+                      <li>
+                        <span class="step-num">3</span>
+                        <span class="step-body">
+                          <span class="step-text">点击「编辑」进入策略详情</span>
+                          <span class="step-sub">本系统自动读取策略全部字段（name / adCluster / mediaCluster / beginTime / endTime 等）</span>
+                        </span>
+                      </li>
+                      <li>
+                        <span class="step-num">4</span>
+                        <span class="step-body">
+                          <span class="step-text">找到「生效日期」区域，点击「一月」按钮</span>
+                          <span class="step-sub">本系统自动在 endTime（毫秒时间戳）+1 个自然月</span>
+                        </span>
+                      </li>
+                      <li>
+                        <span class="step-num">5</span>
+                        <span class="step-body">
+                          <span class="step-text">点击「修改并自动提审」</span>
+                          <span class="step-sub">本系统自动 POST /orientControl/mergeEditV2 提交提审</span>
+                        </span>
+                      </li>
+                    </ol>
+                    <p class="flow-footer">提交后请到 <a href="https://operation-tool.corp.kuaishou.com/approve" target="_blank" rel="noopener">审核页</a> 确认「撤回 / 版本 diff」，或使用本工作台「策略审核」tab 完成两步审批。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <footer class="agent-chat-composer">
+              <textarea
+                id="renewalChatInput"
+                class="agent-chat-input"
+                rows="1"
+                placeholder="输入策略ID，多个用空格分隔，如：13938 14619 22856"
+              ></textarea>
+              <button id="renewalChatSend" class="agent-send-btn" type="button" title="执行延期">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </footer>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="app.js?v=1.7"></script>
+  <script src="home.js?v=1.2"></script>
+  <script src="strategy-query.js?v=1.5"></script>
+  <script src="strategy-renewal.js?v=1.1"></script>
+  <script src="strategy-audit.js?v=5.0"></script>
+</body>
+</html>

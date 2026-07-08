@@ -1,0 +1,22 @@
+# 本地 Cookie 配置（含敏感登录态，不提交）
+server/cookie.json
+
+# 依赖目录
+node_modules/
+__pycache__/
+*.pyc
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+
+# 守护脚本 PID 文件
+.guardian.pid
+.staging.pid
+
+# 浏览器会话缓存（体积大、含登录态）
+server/orient_session/
+server/orient_session_staging/
