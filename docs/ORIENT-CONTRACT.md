@@ -1,6 +1,6 @@
 # Orient 契约与风险登记
 
-抓包/抽样日期：2026-07-22。上游：`operation-tool.corp.kuaishou.com/operation-tool/rest`。
+抓包/抽样日期：2026-07-22。上游 REST 基址由环境变量配置（文档占位：`https://ops-platform.example.corp/rest`），仓库不写真实域名。
 
 ## 1. 审核单 approve 状态迁移真值表
 
