@@ -1,0 +1,7 @@
+# 生产启动（联盟诊断工作台）
+
+- **唯一标准（写死）**：Documents 仓库 + `guardian.sh run`，入口 `scripts/start-production.sh`。说明见 `docs/PRODUCTION-STARTUP.md`。
+- **禁止**：LaunchAgent、`~/Library/Application Support/alliance-workbench`、`start-guardian.sh` 作为生产启动方式；不要再把生产迁出 Documents。
+- **禁止在 Cursor Agent 中执行**：`start-production.sh`、`install-prod-guardian.sh`、Documents 下 `guardian.sh run/restart`、`nohup guardian`。若生产挂了，只运行 `ensure-prod.sh` 做检查，并**提示用户**在 macOS「终端.app」执行 `bash scripts/start-production.sh`。
+- **未经用户明确要求**，不要修改上述唯一启动约定，也不要恢复 LaunchAgent / Application Support 启动链。
+- 代码修复（如 Playwright 路径、API 超时）与启动方式分离；启动问题先对照 `docs/PRODUCTION-STARTUP.md`，不要新造启动脚本。

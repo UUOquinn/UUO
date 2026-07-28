@@ -432,8 +432,7 @@
 /* Box / Panel */
 .github-ui .panel,
 .github-ui .audit-card,
-.github-ui .history-item,
-.github-ui .agent-chat-shell {
+.github-ui .history-item {
   background: var(--gh-canvas-default) !important;
   border: 1px solid var(--gh-border-default) !important;
   border-radius: var(--gh-radius) !important;
@@ -573,6 +572,48 @@
   box-shadow: none !important;
 }
 
+/* 审核人搜索框：图标与文字用 flex 排布，避免全局 input padding 导致重叠 */
+.github-ui .audit-reviewer-input {
+  width: auto !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  padding: 8px 0 !important;
+  font-size: 13px !important;
+  line-height: 20px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.github-ui .audit-reviewer-input:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.github-ui .audit-reviewer-input-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 0 10px !important;
+  background: var(--gh-canvas-default) !important;
+  border: 1px solid var(--gh-border-default) !important;
+  border-radius: var(--gh-radius) !important;
+  box-shadow: none !important;
+}
+
+.github-ui .audit-reviewer-input-wrap:focus-within {
+  border-color: var(--gh-accent-emphasis) !important;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.15) !important;
+}
+
+.github-ui .audit-reviewer-icon,
+.github-ui .audit-reviewer-arrow {
+  flex-shrink: 0 !important;
+  position: static !important;
+}
+
 .github-ui .field span {
   font-size: 14px !important;
   font-weight: 600 !important;
@@ -681,8 +722,8 @@
 
 .github-ui .agent-chat-header {
   padding: 16px 24px !important;
-  background: var(--gh-canvas-default) !important;
-  border-bottom: 1px solid var(--gh-border-default) !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(208, 215, 222, 0.7) !important;
   backdrop-filter: none !important;
 }
 
@@ -700,8 +741,14 @@
 .github-ui .agent-chat-messages {
   flex: 1 !important;
   padding: 20px 24px 24px !important;
-  background: var(--gh-canvas-subtle) !important;
+  background: transparent !important;
   gap: 16px !important;
+}
+
+.github-ui #viewStrategyQuery .agent-chat-messages,
+.github-ui #viewStrategyAudit .agent-chat-messages,
+.github-ui #viewStrategyRenewal .agent-chat-messages {
+  background: transparent !important;
 }
 
 .github-ui .agent-msg {
@@ -848,8 +895,8 @@
   max-width: 720px !important;
   margin: 0 auto !important;
   padding: 16px 24px 20px !important;
-  background: var(--gh-canvas-default) !important;
-  border-top: 1px solid var(--gh-border-default) !important;
+  background: transparent !important;
+  border-top: 1px solid rgba(208, 215, 222, 0.7) !important;
   transition: max-width 0.22s ease, padding 0.22s ease !important;
 }
 
@@ -1149,27 +1196,168 @@
   background: var(--gh-canvas-default) !important;
 }
 
+/* 气泡内结果卡：与气泡同色，避免白底套白底 / 双层边框 */
+.github-ui .agent-msg-content .audit-card {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.github-ui .agent-msg-content .audit-card + .audit-card {
+  margin-top: 14px !important;
+  padding-top: 14px !important;
+  border-top: 1px solid var(--gh-border-muted, #d8dee4) !important;
+}
+
 .github-ui .audit-card-header {
   background: transparent !important;
 }
 
-/* Agent 聊天：外壳白底，消息区灰底（类似 GitHub Issue 讨论区） */
+/* Agent 聊天外壳：整页混色底（类似 home） */
 .github-ui .agent-chat-shell {
-  background: var(--gh-canvas-default) !important;
+  background: linear-gradient(
+    160deg,
+    #f1f3f6 0%,
+    #f0f2f5 16%,
+    #eaecef 32%,
+    #e8eaed 48%,
+    #e9ebee 64%,
+    #eff1f4 80%,
+    #eef0f3 100%
+  ) !important;
   border: none !important;
   border-top: 1px solid var(--gh-border-default) !important;
 }
 
-.github-ui .agent-chat-header {
-  background: var(--gh-canvas-default) !important;
+.github-ui .agent-chat-header,
+.github-ui .agent-chat-messages,
+.github-ui .agent-chat-composer {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-.github-ui .agent-chat-messages {
-  background: var(--gh-canvas-subtle) !important;
+.github-ui .agent-chat-header {
+  border-bottom: 1px solid rgba(208, 215, 222, 0.7) !important;
 }
 
 .github-ui .agent-chat-composer {
-  background: var(--gh-canvas-default) !important;
+  border-top: 1px solid rgba(208, 215, 222, 0.7) !important;
+}
+
+/* 延期页输入区：豆包风格框内渐变 + 圆形发送 */
+.github-ui .agent-chat-composer.chat-mod-composer,
+.github-ui .agent-chat-composer.renewal-composer {
+  flex-direction: column !important;
+  align-items: center !important;
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 20px 24px 24px !important;
+  gap: 0 !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-top: 1px solid rgba(208, 215, 222, 0.7) !important;
+}
+
+.github-ui .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
+.github-ui .agent-chat-shell .agent-chat-composer.renewal-composer:focus-within {
+  max-width: none !important;
+  padding: 20px 24px 24px !important;
+}
+
+.github-ui .chat-mod-input-shell,
+.github-ui .renewal-input-shell {
+  width: 900px !important;
+  max-width: 100% !important;
+}
+
+.github-ui .chat-mod-input-glow,
+.github-ui .renewal-input-glow {
+  background: transparent !important;
+  border: 1px solid var(--gh-border-default, #d0d7de) !important;
+  box-shadow: 0 2px 10px rgba(31, 35, 40, 0.04) !important;
+  padding: 0 !important;
+}
+
+.github-ui .chat-mod-input-glow:focus-within,
+.github-ui .renewal-input-glow:focus-within {
+  border-color: rgba(96, 165, 250, 0.65) !important;
+  background: transparent !important;
+  box-shadow:
+    0 0 0 2px rgba(147, 197, 253, 0.35),
+    0 0 12px 2px rgba(129, 140, 248, 0.22),
+    0 4px 14px rgba(59, 130, 246, 0.1) !important;
+}
+
+.github-ui .chat-mod-input-inner,
+.github-ui .renewal-input-inner {
+  background: #ffffff !important;
+}
+
+.github-ui .chat-mod-input-glow:focus-within .chat-mod-input-inner,
+.github-ui .renewal-input-glow:focus-within .renewal-input-inner {
+  background: #ffffff !important;
+}
+
+.github-ui .chat-mod-input,
+.github-ui .renewal-chat-input {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  min-height: 110px !important;
+  max-height: 110px !important;
+  height: 110px !important;
+}
+
+.github-ui .chat-mod-input:focus,
+.github-ui .renewal-chat-input:focus {
+  background: transparent !important;
+}
+
+.github-ui .chat-mod-send.agent-send-btn,
+.github-ui .renewal-send-btn.agent-send-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  background: #94a3b8 !important;
+  box-shadow: 0 2px 8px rgba(100, 116, 139, 0.25) !important;
+}
+
+.github-ui .chat-mod-input-glow:focus-within .chat-mod-send.agent-send-btn,
+.github-ui .renewal-input-glow:focus-within .renewal-send-btn.agent-send-btn,
+.github-ui .chat-mod-send.agent-send-btn:active:not(:disabled),
+.github-ui .renewal-send-btn.agent-send-btn:active:not(:disabled),
+.github-ui .chat-mod-send.agent-send-btn.is-active,
+.github-ui .renewal-send-btn.agent-send-btn.is-active {
+  background: #93c5fd !important;
+  box-shadow: 0 3px 10px rgba(59, 130, 246, 0.28) !important;
+}
+
+.github-ui .renewal-postpone-btn {
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  border-color: rgba(208, 215, 222, 0.9) !important;
+  color: var(--gh-fg-muted) !important;
+}
+
+.github-ui .renewal-postpone-btn:hover,
+.github-ui .renewal-postpone-btn.is-active {
+  color: #0969da !important;
+  border-color: #54aeff !important;
+  background: #ddf4ff !important;
+}
+
+.github-ui .postpone-modal-backdrop {
+  background: rgba(15, 23, 42, 0.22) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
 }
 
 .github-ui .agent-msg-bubble {
@@ -1185,8 +1373,7 @@
   background: transparent !important;
 }
 
-/* 覆盖 styles.css 遗留的渐变/灰底 */
-.github-ui .agent-chat-shell,
+/* 覆盖 styles.css 遗留的渐变/灰底（聊天外壳保留混合色） */
 .github-ui .empty-state,
 .github-ui .compare-table th {
   background-image: none !important;
@@ -1248,68 +1435,233 @@
   flex: 1 !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-height: calc(100vh - var(--gh-header-height)) !important;
-  padding: 40px 24px 48px !important;
-  background: var(--gh-canvas-subtle) !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  gap: 0 !important;
+  padding: 12px 14px !important;
+  background: #f6f7f9 !important;
 }
 
 .github-ui .gh-home-hero {
-  text-align: center !important;
-  margin-bottom: 28px !important;
-  max-width: 640px !important;
+  display: none !important;
 }
 
-.github-ui .gh-home-mark {
-  display: flex !important;
-  justify-content: center !important;
-  margin-bottom: 16px !important;
-  opacity: 0.9 !important;
-}
-
-.github-ui .gh-home-title {
-  margin: 0 0 8px !important;
-  font-size: 28px !important;
-  font-weight: 600 !important;
-  line-height: 1.25 !important;
-  color: var(--gh-fg-default) !important;
-  letter-spacing: -0.02em !important;
-}
-
-.github-ui .gh-home-subtitle {
+.github-ui .gh-home-stage {
+  --gh-home-stage-gap: 12px;
+  width: 100% !important;
+  max-width: none !important;
   margin: 0 !important;
-  font-size: 14px !important;
-  color: var(--gh-fg-muted) !important;
-  line-height: 1.5 !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 2.1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: var(--gh-home-stage-gap) !important;
+}
+
+/* 左侧：失败/错误（可压缩）+ API 状态（完整优先） */
+.github-ui .gh-home-left {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* 左侧栏：API 服务状态 — 不被压缩，完整展示 */
+.github-ui .gh-home-api-status {
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  min-width: 0 !important;
+  min-height: auto !important;
+  overflow: visible !important;
+  padding: 8px 10px 6px !important;
+  background: #fff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 10px !important;
+}
+
+.github-ui .gh-home-api-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+}
+
+.github-ui .gh-home-api-heading {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+}
+
+.github-ui .gh-home-api-title {
+  margin: 0 !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  color: #1f2937 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.github-ui .gh-home-api-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+}
+
+.github-ui .gh-home-api-row {
+  display: grid !important;
+  grid-template-columns: 8px minmax(0, 1fr) auto !important;
+  grid-template-areas: "dot name state" !important;
+  align-items: center !important;
+  gap: 6px 8px !important;
+  min-width: 0 !important;
+  padding: 6px 8px !important;
+  border-radius: 8px !important;
+  background: #f9fafb !important;
+}
+
+.github-ui .gh-home-api-dot {
+  grid-area: dot !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: #d1d5db !important;
+  align-self: center !important;
+  margin-top: 0 !important;
+}
+
+.github-ui .gh-home-api-row.is-pending .gh-home-api-dot {
+  background: #93c5fd !important;
+}
+
+.github-ui .gh-home-api-row.is-ok .gh-home-api-dot {
+  background: #22c55e !important;
+}
+
+.github-ui .gh-home-api-row.is-err .gh-home-api-dot {
+  background: #ef4444 !important;
+}
+
+.github-ui .gh-home-api-path {
+  display: none !important;
+}
+
+.github-ui .gh-home-api-name {
+  grid-area: name !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+.github-ui .gh-home-api-state {
+  grid-area: state !important;
+  justify-self: end !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #6b7280 !important;
+  white-space: nowrap !important;
+}
+
+.github-ui .gh-home-api-row.is-ok .gh-home-api-state {
+  color: #15803d !important;
+}
+
+.github-ui .gh-home-api-row.is-err .gh-home-api-state {
+  color: #b91c1c !important;
+}
+
+.github-ui .gh-home-api-foot {
+  display: flex !important;
+  justify-content: flex-end !important;
+  flex-shrink: 0 !important;
+}
+
+.github-ui .gh-home-api-updated {
+  font-size: 11px !important;
+  color: #9ca3af !important;
 }
 
 .github-ui .gh-home-composer-wrap {
-  width: 692px !important;
+  position: relative !important;
+  width: 100% !important;
   max-width: 100% !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+  z-index: 5 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.github-ui .gh-home-badge {
+  position: absolute !important;
+  top: -22px !important;
+  left: 2px !important;
+  z-index: 2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 20px !important;
+  padding: 0 8px !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  border: 1px solid #e5e7eb !important;
+  color: #6b7280 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1 !important;
+  text-transform: lowercase !important;
+  user-select: none !important;
+  pointer-events: none !important;
 }
 
 .github-ui .gh-home-composer {
+  position: relative !important;
   box-sizing: border-box !important;
-  width: 692px !important;
-  height: 150px !important;
+  width: 100% !important;
+  height: 118px !important;
   max-width: 100% !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
   gap: 0 !important;
-  padding: 14px 16px 12px !important;
-  background: var(--gh-canvas-default) !important;
-  border: 1px solid var(--gh-border-default) !important;
+  padding: 12px 12px 8px !important;
+  overflow: visible !important;
+  background: #fff !important;
+  border: 1px solid #e5e7eb !important;
   border-radius: 12px !important;
-  box-shadow: 0 8px 24px rgba(140, 149, 159, 0.15) !important;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+  box-shadow: none !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, height 0.18s ease !important;
 }
 
 .github-ui .gh-home-composer:focus-within,
 .github-ui .gh-home-composer.gh-home-composer-expanded {
-  border-color: var(--gh-accent-emphasis) !important;
-  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.2), 0 8px 24px rgba(140, 149, 159, 0.12) !important;
+  height: 142px !important;
+  border-color: #c7d2fe !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08) !important;
+}
+
+.github-ui .gh-home-composer-wrap:has(.gh-home-composer:focus-within),
+.github-ui .gh-home-composer-wrap:has(.gh-home-composer-expanded) {
+  width: 100% !important;
+  transform: none !important;
 }
 
 .github-ui .gh-home-input {
@@ -1319,7 +1671,7 @@
   min-height: 0 !important;
   max-height: none !important;
   height: auto !important;
-  padding: 0 2px !important;
+  padding: 0 4px 0 2px !important;
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -1346,22 +1698,28 @@
   align-items: center !important;
   justify-content: space-between !important;
   gap: 12px !important;
-  margin-top: 8px !important;
+  margin-top: 6px !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
   flex-shrink: 0 !important;
 }
 
 .github-ui .gh-home-feature-wrap {
   position: relative !important;
-  flex: 1 !important;
+  flex: 0 1 auto !important;
   min-width: 0 !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+  margin-left: 0 !important;
 }
 
 .github-ui .gh-home-feature {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 4px !important;
   max-width: 100% !important;
-  padding: 4px 10px !important;
+  margin: 0 !important;
+  padding: 3px 8px 3px 4px !important;
   border: 1px solid var(--gh-border-default) !important;
   border-radius: 2em !important;
   background: var(--gh-canvas-subtle) !important;
@@ -1458,18 +1816,388 @@
   transform: scale(1.05) !important;
 }
 
-@media (max-width: 768px) {
-  .github-ui .gh-home-title {
-    font-size: 22px !important;
+/* ── 首页：左错误可压缩 + 右日志略压缩，保证 API 完整 ── */
+.github-ui .gh-home-errors {
+  flex: 1 1 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  background: #fff !important;
+  border: 1px solid #fecaca !important;
+  border-radius: 10px !important;
+}
+
+.github-ui .gh-home-errors .gh-home-log-title {
+  color: #b91c1c !important;
+}
+
+.github-ui .gh-home-errors .gh-home-log-pill {
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+}
+
+.github-ui .gh-home-errors .gh-home-log-search:focus-within {
+  border-bottom-color: #ef4444 !important;
+}
+
+.github-ui .gh-home-error-body {
+  color: #991b1b !important;
+}
+
+.github-ui .gh-home-logs {
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.github-ui .gh-home-log-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  background: #fff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+.github-ui .gh-home-log-panel + .gh-home-log-panel {
+  border-top: 1px solid #e5e7eb !important;
+  border-left: 0 !important;
+}
+
+.github-ui .gh-home-log-panel.is-audit,
+.github-ui .gh-home-log-panel.is-postpone,
+.github-ui .gh-home-log-panel.is-query {
+  flex: 1 1 0 !important;
+}
+
+.github-ui .gh-home-log-head {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  padding: 8px 10px 6px !important;
+  border-bottom: 0 !important;
+  background: transparent !important;
+  flex-shrink: 0 !important;
+}
+
+.github-ui .gh-home-log-heading {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+}
+
+.github-ui .gh-home-log-title {
+  margin: 0 !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  color: #1f2937 !important;
+  letter-spacing: 0.01em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.github-ui .gh-home-log-hint {
+  margin: 0 !important;
+  padding: 0 2px !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+  color: #9ca3af !important;
+}
+
+.github-ui .gh-home-log-tools {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  justify-content: flex-start !important;
+}
+
+/* 单层搜索：底部分隔线，无外框套内框 */
+.github-ui .gh-home-log-search {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  max-width: none !important;
+  height: 32px !important;
+  padding: 0 2px 0 0 !important;
+  border: 0 !important;
+  border-bottom: 1.5px solid #e5e7eb !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #6b7280 !important;
+  box-shadow: none !important;
+}
+
+.github-ui .gh-home-log-search:focus-within {
+  border-bottom-color: #6366f1 !important;
+  box-shadow: none !important;
+  color: #4b5563 !important;
+}
+
+.github-ui .gh-home-log-search-icon {
+  flex-shrink: 0 !important;
+  width: 18px !important;
+  height: 18px !important;
+  display: block !important;
+  opacity: 0.85 !important;
+}
+
+.github-ui .gh-home-log-search-input {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  line-height: 1.3 !important;
+  color: #111827 !important;
+  padding: 0 !important;
+}
+
+.github-ui .gh-home-log-search-input::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+.github-ui .gh-home-log-search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.github-ui .gh-home-log-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  max-width: 120px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  padding: 2px 8px !important;
+  border-radius: 999px !important;
+  border: 0 !important;
+  background: #f3f4f6 !important;
+  color: #6b7280 !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  flex-shrink: 0 !important;
+}
+
+.github-ui .gh-home-log-pill.is-busy {
+  color: #92400e !important;
+  background: #fef3c7 !important;
+}
+
+.github-ui .gh-home-log-refresh {
+  appearance: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #6b7280 !important;
+  border-radius: 8px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  padding: 0 8px !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+}
+
+.github-ui .gh-home-log-refresh:hover {
+  color: #111827 !important;
+  background: #f3f4f6 !important;
+}
+
+.github-ui .gh-home-log-body {
+  margin: 0 !important;
+  padding: 2px 12px 12px !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  font-size: 12px !important;
+  line-height: 1.7 !important;
+  color: #4b5563 !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.github-ui .gh-home-query-list {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 2px 8px 10px !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.github-ui .gh-home-query-empty {
+  padding: 16px 10px !important;
+  color: #9ca3af !important;
+  font-size: 12.5px !important;
+  line-height: 1.5 !important;
+  text-align: center !important;
+}
+
+.github-ui .gh-home-query-item {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 8px 8px !important;
+  margin: 0 !important;
+  border-radius: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  cursor: pointer !important;
+}
+
+.github-ui .gh-home-query-item:hover,
+.github-ui .gh-home-query-item:focus {
+  outline: none !important;
+  background: #f3f4f6 !important;
+}
+
+.github-ui .gh-home-query-main {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+}
+
+.github-ui .gh-home-query-tag {
+  align-self: flex-start !important;
+  font-size: 10px !important;
+  font-weight: 650 !important;
+  color: #9ca3af !important;
+  letter-spacing: 0.03em !important;
+}
+
+.github-ui .gh-home-query-op {
+  align-self: flex-start !important;
+  font-size: 10px !important;
+  color: #6b7280 !important;
+}
+
+.github-ui .gh-home-query-text {
+  font-size: 13px !important;
+  color: #1f2937 !important;
+  line-height: 1.4 !important;
+  word-break: break-word !important;
+}
+
+.github-ui .gh-home-query-time {
+  flex-shrink: 0 !important;
+  font-size: 11px !important;
+  color: #9ca3af !important;
+  white-space: nowrap !important;
+  padding-top: 2px !important;
+}
+
+@media (max-width: 900px) {
+  .github-ui .gh-home-stage {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
   }
 
+  .github-ui .gh-home-left {
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  .github-ui .gh-home-errors {
+    flex: 0 1 auto !important;
+    max-height: 180px !important;
+    min-height: 100px !important;
+    width: 100% !important;
+  }
+
+  .github-ui .gh-home-api-status {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
+  }
+
+  .github-ui .gh-home-logs {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .github-ui .gh-home-log-panel.is-audit,
+  .github-ui .gh-home-log-panel.is-postpone,
+  .github-ui .gh-home-log-panel.is-query {
+    flex: 1 1 0 !important;
+    min-height: 120px !important;
+  }
+}
+
+@media (max-width: 768px) {
   .github-ui .gh-home-shell {
-    justify-content: flex-start !important;
-    padding-top: 56px !important;
+    padding: 12px !important;
+  }
+
+  .github-ui .gh-home-log-search {
+    max-width: none !important;
+    flex: 1 1 auto !important;
   }
 
   .github-ui .gh-home-composer-wrap,
+  .github-ui .gh-home-composer-wrap:has(.gh-home-composer:focus-within),
+  .github-ui .gh-home-composer-wrap:has(.gh-home-composer-expanded),
   .github-ui .gh-home-composer {
     width: 100% !important;
+    transform: none !important;
+  }
+
+  .github-ui .gh-home-composer {
+    height: 112px !important;
+  }
+
+  .github-ui .gh-home-composer:focus-within,
+  .github-ui .gh-home-composer.gh-home-composer-expanded {
+    height: 136px !important;
   }
 }

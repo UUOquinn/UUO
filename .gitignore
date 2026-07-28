@@ -5,13 +5,18 @@ server/cookie.json
 node_modules/
 __pycache__/
 *.pyc
+*.pyo
+.Python
 
 # 系统
 .DS_Store
 Thumbs.db
 
-# 日志
+# 日志与运行数据（不上 GitHub）
 *.log
+server/data/logs/*.jsonl
+server/data/logs/**/*.jsonl
+server/modules/strategy_postpone/data/*.json
 
 # 守护脚本 PID 文件
 .guardian.pid
@@ -19,4 +24,19 @@ Thumbs.db
 
 # 浏览器会话缓存（体积大、含登录态）
 server/orient_session/
-server/orient_session_staging/
+server/orient_session_*/
+server/modules/**/orient_session*/
+
+# 本地回滚/备份产物
+.rollback*/
+.rollback-*/
+*.bak*
+*.bak
+
+# Cursor 本地状态（保留 rules 供团队约定）
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+
+# 可选：编辑器工作区
+*.code-workspace

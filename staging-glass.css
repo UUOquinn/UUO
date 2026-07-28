@@ -1,0 +1,4931 @@
+/* ═══════════════════════════════════════════════════════
+ * 测试环境专属 · 白色玻璃 UI（:3001 + html.staging-ui）
+ * Cursor 风格：柔白底、分层毛玻璃、圆角与顺滑过渡
+ * 生产 :3000 不挂载 staging-ui，本文件零影响
+ * ═══════════════════════════════════════════════════════ */
+
+.staging-env-badge {
+  display: none;
+}
+
+html.staging-ui {
+  --sg-bg-1: #f6f7f9;
+  --sg-bg-2: #eef1f6;
+  --sg-bg-3: #f3f4f8;
+  --sg-text: #1a1d21;
+  --sg-text-muted: #6b7280;
+  --sg-text-subtle: #9ca3af;
+  --sg-accent: #4f6ef7;
+  --sg-accent-soft: rgba(79, 110, 247, 0.12);
+  --sg-border: rgba(15, 23, 42, 0.06);
+  --sg-border-strong: rgba(15, 23, 42, 0.1);
+  --sg-glass: rgba(255, 255, 255, 0.58);
+  --sg-glass-strong: rgba(255, 255, 255, 0.78);
+  --sg-glass-border: rgba(255, 255, 255, 0.72);
+  --sg-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 36px rgba(15, 23, 42, 0.06);
+  --sg-shadow-hover: 0 2px 6px rgba(15, 23, 42, 0.06), 0 16px 44px rgba(15, 23, 42, 0.09);
+  --sg-inset: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  --sg-blur: blur(22px) saturate(185%);
+  --sg-radius: 14px;
+  --sg-radius-lg: 18px;
+  --sg-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --sg-dur: 0.24s;
+
+  scroll-behavior: smooth;
+}
+
+html.staging-ui,
+html.staging-ui body {
+  background: linear-gradient(
+    155deg,
+    var(--sg-bg-1) 0%,
+    var(--sg-bg-2) 38%,
+    var(--sg-bg-3) 68%,
+    #fafbfc 100%
+  ) !important;
+  color: var(--sg-text) !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 背景柔光层 */
+html.staging-ui body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 12% -8%, rgba(147, 170, 255, 0.14), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 88% 8%, rgba(186, 196, 255, 0.12), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(226, 232, 240, 0.35), transparent 55%);
+}
+
+html.staging-ui .app-shell {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+}
+
+/* ── 侧栏 · 毛玻璃 ── */
+html.staging-ui .sidebar {
+  background: var(--sg-glass-strong) !important;
+  backdrop-filter: var(--sg-blur) !important;
+  -webkit-backdrop-filter: var(--sg-blur) !important;
+  border-right: 1px solid var(--sg-glass-border) !important;
+  box-shadow: var(--sg-shadow), var(--sg-inset) !important;
+}
+
+html.staging-ui .nav-item {
+  border-radius: 10px !important;
+  transition: background var(--sg-dur) var(--sg-ease), color var(--sg-dur) var(--sg-ease),
+    transform var(--sg-dur) var(--sg-ease) !important;
+}
+
+html.staging-ui .nav-item:hover:not(.disabled) {
+  background: rgba(255, 255, 255, 0.72) !important;
+  transform: translateX(1px);
+}
+
+html.staging-ui .nav-item.active {
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), var(--sg-inset) !important;
+  color: var(--sg-text) !important;
+}
+
+html.staging-ui .nav-label {
+  color: var(--sg-text-subtle) !important;
+  letter-spacing: 0.06em !important;
+}
+
+html.staging-ui .sidebar-footer {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── 顶栏 ── */
+html.staging-ui .main {
+  background: transparent !important;
+}
+
+html.staging-ui .topbar {
+  background: var(--sg-glass-strong) !important;
+  backdrop-filter: var(--sg-blur) !important;
+  -webkit-backdrop-filter: var(--sg-blur) !important;
+  border-bottom: 1px solid var(--sg-border) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+html.staging-ui .staging-env-badge {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  margin-right: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #3d4fbf;
+  background: rgba(79, 110, 247, 0.1);
+  border: 1px solid rgba(79, 110, 247, 0.18);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+}
+
+html.staging-ui .staging-env-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4f6ef7;
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.2);
+}
+
+html.staging-ui .content {
+  background: transparent !important;
+}
+
+/* ── 卡片 / 面板 · 分层玻璃 ── */
+html.staging-ui .panel,
+html.staging-ui .stat-card,
+html.staging-ui .result-panel,
+html.staging-ui .history-item,
+html.staging-ui .audit-card,
+html.staging-ui section.panel {
+  background: var(--sg-glass) !important;
+  backdrop-filter: var(--sg-blur) !important;
+  -webkit-backdrop-filter: var(--sg-blur) !important;
+  border: 1px solid var(--sg-glass-border) !important;
+  border-radius: var(--sg-radius-lg) !important;
+  box-shadow: var(--sg-shadow), var(--sg-inset) !important;
+  transition: box-shadow var(--sg-dur) var(--sg-ease), transform var(--sg-dur) var(--sg-ease),
+    background var(--sg-dur) var(--sg-ease) !important;
+}
+
+html.staging-ui .stat-card:hover,
+html.staging-ui .history-item:hover,
+html.staging-ui .panel:hover {
+  background: var(--sg-glass-strong) !important;
+  box-shadow: var(--sg-shadow-hover), var(--sg-inset) !important;
+  transform: translateY(-1px);
+}
+
+html.staging-ui .stat-card::before {
+  display: none !important;
+}
+
+html.staging-ui .page-header h1,
+html.staging-ui .agent-chat-header h1 {
+  font-weight: 650 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--sg-text) !important;
+}
+
+html.staging-ui .page-header p,
+html.staging-ui .agent-chat-header p,
+html.staging-ui .breadcrumb {
+  color: var(--sg-text-muted) !important;
+}
+
+/* ── 按钮 · 柔顺 ── */
+html.staging-ui .btn-primary {
+  background: linear-gradient(180deg, #5a7af8 0%, #4f6ef7 100%) !important;
+  border: 1px solid rgba(79, 110, 247, 0.35) !important;
+  border-radius: 11px !important;
+  box-shadow: 0 2px 8px rgba(79, 110, 247, 0.28) !important;
+  transition: transform var(--sg-dur) var(--sg-ease), box-shadow var(--sg-dur) var(--sg-ease) !important;
+}
+
+html.staging-ui .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(79, 110, 247, 0.34) !important;
+}
+
+html.staging-ui .btn-ghost,
+html.staging-ui .btn-sm {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid var(--sg-border) !important;
+  border-radius: 10px !important;
+  backdrop-filter: blur(12px);
+  transition: background var(--sg-dur) var(--sg-ease), border-color var(--sg-dur) var(--sg-ease) !important;
+}
+
+html.staging-ui .btn-ghost:hover,
+html.staging-ui .btn-sm:hover {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: var(--sg-border-strong) !important;
+}
+
+html.staging-ui .status-badge {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid var(--sg-border) !important;
+  border-radius: 999px !important;
+  backdrop-filter: blur(10px);
+}
+
+/* ── 输入框 · 玻璃内凹 ── */
+html.staging-ui input,
+html.staging-ui select,
+html.staging-ui textarea {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid var(--sg-border) !important;
+  border-radius: 11px !important;
+  transition: border-color var(--sg-dur) var(--sg-ease), box-shadow var(--sg-dur) var(--sg-ease),
+    background var(--sg-dur) var(--sg-ease) !important;
+}
+
+html.staging-ui input:focus,
+html.staging-ui select:focus,
+html.staging-ui textarea:focus {
+  border-color: rgba(79, 110, 247, 0.45) !important;
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.12) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+html.staging-ui .chip,
+html.staging-ui .chip-sm {
+  background: rgba(255, 255, 255, 0.62) !important;
+  border: 1px solid var(--sg-border) !important;
+  border-radius: 999px !important;
+  backdrop-filter: blur(8px);
+}
+
+/* ── Agent 聊天 · 整页柔白玻璃 ── */
+html.staging-ui .agent-chat-shell {
+  background: linear-gradient(
+    165deg,
+    rgba(246, 247, 249, 0.95) 0%,
+    rgba(238, 241, 246, 0.92) 45%,
+    rgba(250, 251, 252, 0.95) 100%
+  ) !important;
+  border: none !important;
+}
+
+html.staging-ui .agent-chat-header {
+  background: rgba(255, 255, 255, 0.42) !important;
+  backdrop-filter: var(--sg-blur) !important;
+  -webkit-backdrop-filter: var(--sg-blur) !important;
+  border-bottom: 1px solid var(--sg-border) !important;
+}
+
+html.staging-ui .agent-chat-messages {
+  scroll-behavior: smooth;
+}
+
+html.staging-ui .agent-msg-bubble {
+  background: var(--sg-glass-strong) !important;
+  backdrop-filter: var(--sg-blur) !important;
+  -webkit-backdrop-filter: var(--sg-blur) !important;
+  border: 1px solid var(--sg-glass-border) !important;
+  border-radius: var(--sg-radius-lg) !important;
+  box-shadow: var(--sg-shadow), var(--sg-inset) !important;
+}
+
+html.staging-ui .agent-msg-user .agent-msg-bubble {
+  background: rgba(79, 110, 247, 0.12) !important;
+  border-color: rgba(79, 110, 247, 0.2) !important;
+}
+
+html.staging-ui .agent-chat-composer {
+  background: rgba(255, 255, 255, 0.38) !important;
+  backdrop-filter: var(--sg-blur) !important;
+  -webkit-backdrop-filter: var(--sg-blur) !important;
+  border-top: 1px solid var(--sg-border) !important;
+}
+
+html.staging-ui .chat-mod-input-glow,
+html.staging-ui .renewal-input-glow,
+html.staging-ui .gh-home-composer {
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: var(--sg-blur) !important;
+  -webkit-backdrop-filter: var(--sg-blur) !important;
+  border: 1px solid var(--sg-glass-border) !important;
+  border-radius: var(--sg-radius-lg) !important;
+  box-shadow: var(--sg-shadow), var(--sg-inset) !important;
+  transition: box-shadow var(--sg-dur) var(--sg-ease), border-color var(--sg-dur) var(--sg-ease) !important;
+}
+
+html.staging-ui .chat-mod-input-glow:focus-within,
+html.staging-ui .renewal-input-glow:focus-within,
+html.staging-ui .gh-home-composer:focus-within {
+  border-color: rgba(79, 110, 247, 0.35) !important;
+  box-shadow: 0 0 0 4px rgba(79, 110, 247, 0.1), var(--sg-shadow-hover), var(--sg-inset) !important;
+}
+
+html.staging-ui .chat-mod-send.agent-send-btn,
+html.staging-ui .renewal-send-btn.agent-send-btn,
+html.staging-ui .gh-home-send {
+  border-radius: 11px !important;
+  transition: background var(--sg-dur) var(--sg-ease), color var(--sg-dur) var(--sg-ease),
+    transform var(--sg-dur) var(--sg-ease) !important;
+}
+
+html.staging-ui .strategy-meta-badge {
+  background: rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid var(--sg-border) !important;
+  border-radius: 999px !important;
+  backdrop-filter: blur(10px);
+}
+
+/* ── 首页 home ── */
+html.staging-ui .gh-home-shell {
+  background: transparent !important;
+}
+
+html.staging-ui .gh-home-badge {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid var(--sg-border) !important;
+  backdrop-filter: blur(10px);
+}
+
+html.staging-ui .gh-home-feature {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid var(--sg-border) !important;
+  border-radius: 10px !important;
+}
+
+html.staging-ui .gh-home-feature-menu {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: var(--sg-blur) !important;
+  border: 1px solid var(--sg-glass-border) !important;
+  border-radius: var(--sg-radius) !important;
+  box-shadow: var(--sg-shadow-hover) !important;
+}
+
+/* ── 手册 / 表格 ── */
+html.staging-ui .handbook-section.panel {
+  background: var(--sg-glass) !important;
+}
+
+/* 目录固定：覆盖 .panel 的 position:relative / overflow:hidden / hover transform */
+html.staging-ui .handbook-toc.panel {
+  position: sticky !important;
+  top: 12px !important;
+  align-self: start !important;
+  z-index: 8 !important;
+  max-height: calc(100dvh - 96px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  transform: none !important;
+}
+
+html.staging-ui .handbook-toc.panel:hover {
+  transform: none !important;
+}
+
+html.staging-ui .handbook-toc.panel::before {
+  display: none !important;
+}
+
+html.staging-ui .handbook-toc .panel-header h2 {
+  color: #1f2328 !important;
+  font-weight: 700 !important;
+}
+
+/* 覆盖 .github-ui a 的蓝色 + hover 下划线 */
+html.staging-ui .handbook-toc-list a,
+html.github-ui .handbook-toc-list a {
+  color: #1f2328 !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+}
+
+html.staging-ui .handbook-toc-list a:hover,
+html.staging-ui .handbook-toc-list a:focus,
+html.staging-ui .handbook-toc-list a:focus-visible,
+html.staging-ui .handbook-toc-list a:active,
+html.staging-ui .handbook-toc-list a:visited,
+html.staging-ui .handbook-toc-list a.active,
+html.github-ui .handbook-toc-list a:hover,
+html.github-ui .handbook-toc-list a:focus,
+html.github-ui .handbook-toc-list a:focus-visible,
+html.github-ui .handbook-toc-list a:active,
+html.github-ui .handbook-toc-list a:visited,
+html.github-ui .handbook-toc-list a.active {
+  color: #1f2328 !important;
+  text-decoration: none !important;
+  outline: none !important;
+}
+
+html.staging-ui .handbook-toc-list a:hover,
+html.github-ui .handbook-toc-list a:hover {
+  background: rgba(9, 105, 218, 0.08) !important;
+}
+
+html.staging-ui .handbook-toc-list a.active,
+html.github-ui .handbook-toc-list a.active {
+  background: rgba(9, 105, 218, 0.12) !important;
+  font-weight: 800 !important;
+}
+
+/* 正文统一用 GitHub 主文字色，避免灰/黑/蓝混杂 */
+html.staging-ui .handbook-section .panel-header h2,
+html.github-ui .handbook-section .panel-header h2 {
+  color: #1f2328 !important;
+  font-weight: 700 !important;
+}
+
+html.staging-ui .handbook-content,
+html.github-ui .handbook-content {
+  color: #1f2328 !important;
+}
+
+html.staging-ui .handbook-content h3,
+html.staging-ui .handbook-content h4,
+html.staging-ui .handbook-content strong,
+html.staging-ui .handbook-content li,
+html.staging-ui .handbook-content p,
+html.github-ui .handbook-content h3,
+html.github-ui .handbook-content h4,
+html.github-ui .handbook-content strong,
+html.github-ui .handbook-content li,
+html.github-ui .handbook-content p {
+  color: #1f2328 !important;
+}
+
+html.staging-ui .handbook-content a,
+html.github-ui .handbook-content a {
+  color: #0969da !important;
+  text-decoration: none !important;
+}
+
+html.staging-ui .handbook-content a:hover,
+html.github-ui .handbook-content a:hover {
+  color: #0550ae !important;
+  text-decoration: underline !important;
+}
+
+html.staging-ui .handbook-content code,
+html.github-ui .handbook-content code {
+  color: #1f2328 !important;
+  background: rgba(175, 184, 193, 0.2) !important;
+  border-color: rgba(208, 215, 222, 0.8) !important;
+}
+
+html.staging-ui .handbook-tip,
+html.github-ui .handbook-tip {
+  color: #1f2328 !important;
+  background: rgba(9, 105, 218, 0.06) !important;
+  border-color: rgba(9, 105, 218, 0.16) !important;
+}
+
+html.staging-ui #viewHandbook .page-header h1,
+html.github-ui #viewHandbook .page-header h1 {
+  color: #1f2328 !important;
+}
+
+html.staging-ui #viewHandbook .page-header p,
+html.github-ui #viewHandbook .page-header p {
+  color: #656d76 !important;
+}
+
+html.staging-ui .data-table th {
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+html.staging-ui .data-table tbody tr:hover {
+  background: rgba(79, 110, 247, 0.04) !important;
+}
+
+html.staging-ui code {
+  background: rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid var(--sg-border) !important;
+  border-radius: 6px !important;
+}
+
+/* ── 滚动条 · 柔顺 ── */
+html.staging-ui ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+html.staging-ui ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html.staging-ui ::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.12);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+  transition: background var(--sg-dur) var(--sg-ease);
+}
+
+html.staging-ui ::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.2);
+  background-clip: padding-box;
+}
+
+@supports not (backdrop-filter: blur(12px)) {
+  html.staging-ui .sidebar,
+  html.staging-ui .topbar,
+  html.staging-ui .panel,
+  html.staging-ui .stat-card,
+  html.staging-ui .agent-msg-bubble {
+    background: rgba(255, 255, 255, 0.94) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.staging-ui {
+    scroll-behavior: auto;
+  }
+
+  html.staging-ui .stat-card:hover,
+  html.staging-ui .btn-primary:hover {
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+ * Glass UI v2 · 整体玻璃拟态重构
+ * 后置覆盖 github-ui：悬浮壳体、透明层级、光晕与高光
+ * ═══════════════════════════════════════════════════════ */
+
+html.staging-ui {
+  --sg-blue: #4f6ef7;
+  --sg-violet: #8b7cf6;
+  --sg-cyan: #50bce3;
+  --sg-pink: #e89bc2;
+  --sg-page-gap: 12px;
+  --sg-panel-border: rgba(255, 255, 255, 0.74);
+  --sg-panel-bg: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.72),
+    rgba(255, 255, 255, 0.42)
+  );
+  --sg-panel-shadow:
+    0 1px 1px rgba(255, 255, 255, 0.95) inset,
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 40px rgba(67, 78, 112, 0.08);
+}
+
+html.staging-ui body {
+  min-width: 320px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(139, 124, 246, 0.2), transparent 28%),
+    radial-gradient(circle at 88% 10%, rgba(80, 188, 227, 0.18), transparent 26%),
+    radial-gradient(circle at 76% 88%, rgba(232, 155, 194, 0.15), transparent 28%),
+    linear-gradient(145deg, #f7f8fc 0%, #edf1f8 46%, #f8f5fa 100%) !important;
+}
+
+html.staging-ui body::before {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 16% 20%, rgba(255, 255, 255, 0.95) 0 2px, transparent 3px),
+    radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.85) 0 2px, transparent 3px),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.24), transparent 45%) !important;
+  background-size: 180px 180px, 240px 240px, 100% 100% !important;
+}
+
+html.staging-ui body::after {
+  content: "";
+  position: fixed;
+  inset: auto -12vw -28vh auto;
+  width: 48vw;
+  height: 48vw;
+  min-width: 520px;
+  min-height: 520px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle, rgba(139, 124, 246, 0.14), transparent 66%);
+  filter: blur(20px);
+}
+
+html.staging-ui .app-shell {
+  gap: var(--sg-page-gap) !important;
+  padding: var(--sg-page-gap) !important;
+  height: 100dvh !important;
+  background: transparent !important;
+}
+
+/* 悬浮侧栏 */
+html.staging-ui .sidebar {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 244px !important;
+  min-width: 244px !important;
+  min-height: 0 !important;
+  height: calc(100dvh - (var(--sg-page-gap) * 2)) !important;
+  max-height: calc(100dvh - (var(--sg-page-gap) * 2)) !important;
+  overflow: hidden !important;
+  border: 1px solid var(--sg-panel-border) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.44)) !important;
+  box-shadow: var(--sg-panel-shadow) !important;
+  backdrop-filter: blur(30px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(190%) !important;
+}
+
+html.staging-ui .sidebar::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 120px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.46), transparent);
+  border-radius: inherit;
+}
+
+html.staging-ui .nav {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 10px !important;
+  scrollbar-gutter: stable;
+}
+
+html.staging-ui .nav-group {
+  padding: 8px !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+}
+
+html.staging-ui .nav-group + .nav-group {
+  margin-top: 10px !important;
+}
+
+html.staging-ui .nav-item {
+  min-height: 40px !important;
+  margin: 2px 0 !important;
+  padding: 9px 11px !important;
+  border: 1px solid transparent !important;
+  color: #4b5565 !important;
+}
+
+html.staging-ui .nav-item:hover:not(.disabled) {
+  background: rgba(255, 255, 255, 0.58) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  color: #202534 !important;
+  box-shadow: 0 4px 16px rgba(56, 68, 102, 0.05), inset 0 1px rgba(255, 255, 255, 0.75) !important;
+  transform: none !important;
+}
+
+html.staging-ui .nav-item.active {
+  color: #3147ba !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(235, 239, 255, 0.78)) !important;
+  border-color: rgba(255, 255, 255, 0.96) !important;
+  box-shadow:
+    0 6px 18px rgba(79, 110, 247, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+
+html.staging-ui .nav-item.active .nav-icon {
+  color: var(--sg-blue) !important;
+}
+
+html.staging-ui .sidebar-footer {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  margin: 0 8px 10px !important;
+  padding: 8px 4px 4px !important;
+  max-height: none;
+  overflow: visible;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* KwaiBI Cookie：纵向清晰分区，看着舒服 */
+html.staging-ui .sidebar-settings {
+  margin: 0 !important;
+}
+
+html.staging-ui .sidebar-settings summary {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 2px 2px 8px !important;
+  margin: 0 !important;
+  font-size: 12px !important;
+  line-height: 1.3 !important;
+  color: #4b5565 !important;
+  list-style: none !important;
+}
+
+html.staging-ui .sidebar-settings summary::-webkit-details-marker {
+  display: none !important;
+}
+
+html.staging-ui .cookie-title {
+  font-weight: 650 !important;
+  color: #242936 !important;
+}
+
+html.staging-ui .cookie-optional {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 1px 6px !important;
+  border-radius: 999px !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+  background: rgba(16, 16, 16, 0.05) !important;
+}
+
+html.staging-ui .cookie-config {
+  margin-top: 0 !important;
+  padding: 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(16, 16, 16, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.staging-ui .cookie-config input#kwabiCookieInput {
+  width: 100% !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin: 0 !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  line-height: 32px !important;
+  color: #1f2328 !important;
+  background: #f6f8fa !important;
+  border: 1px solid rgba(16, 16, 16, 0.12) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-sizing: border-box !important;
+}
+
+html.staging-ui .cookie-config input#kwabiCookieInput::placeholder {
+  color: #8b949e !important;
+  font-size: 11px !important;
+}
+
+html.staging-ui .cookie-actions {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+}
+
+html.staging-ui .cookie-actions .btn-sm,
+html.staging-ui .cookie-actions .btn-sm-primary {
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 12px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  border-radius: 6px !important;
+  flex: 0 0 auto !important;
+}
+
+html.staging-ui .cookie-status {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 6px 8px !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  border-radius: 6px !important;
+  background: rgba(16, 16, 16, 0.04) !important;
+  color: #4b5565 !important;
+  box-sizing: border-box !important;
+}
+
+html.staging-ui .cookie-status.ok {
+  background: rgba(5, 150, 105, 0.08) !important;
+  color: #059669 !important;
+}
+
+html.staging-ui .cookie-status.err {
+  background: rgba(220, 38, 38, 0.08) !important;
+  color: #dc2626 !important;
+}
+
+html.staging-ui .cookie-tip {
+  margin: 0 !important;
+  padding: 0 2px !important;
+  font-size: 10px !important;
+  line-height: 1.45 !important;
+  color: #8b949e !important;
+}
+
+/* 主窗口成为第二块悬浮玻璃 */
+html.staging-ui .main {
+  min-width: 0;
+  height: calc(100dvh - (var(--sg-page-gap) * 2)) !important;
+  overflow: hidden !important;
+  border: 1px solid var(--sg-panel-border) !important;
+  border-radius: 22px !important;
+  background: rgba(255, 255, 255, 0.24) !important;
+  box-shadow: var(--sg-panel-shadow) !important;
+  backdrop-filter: blur(22px) saturate(175%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(175%) !important;
+}
+
+html.staging-ui .topbar {
+  height: 56px !important;
+  min-height: 56px !important;
+  padding: 0 20px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.42)) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.68) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 8px 24px rgba(62, 73, 105, 0.035) !important;
+}
+
+html.staging-ui .breadcrumb {
+  font-weight: 500 !important;
+}
+
+html.staging-ui #breadcrumbCurrent {
+  color: #242936 !important;
+  font-weight: 650 !important;
+}
+
+html.staging-ui .content {
+  padding: 22px !important;
+  overflow: auto !important;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.5), transparent 34%),
+    transparent !important;
+}
+
+html.staging-ui .content.content-home,
+html.staging-ui .content.content-strategy-query {
+  padding: 0 !important;
+}
+
+/* 面板采用三级玻璃深度 */
+html.staging-ui .panel,
+html.staging-ui .stat-card,
+html.staging-ui .result-panel,
+html.staging-ui .history-item,
+html.staging-ui .audit-card,
+html.staging-ui section.panel,
+html.staging-ui .strategy-card,
+html.staging-ui .strategy-agg-bucket,
+html.staging-ui .postpone-modal-panel,
+html.staging-ui .audit-whitelist-modal-panel {
+  position: relative;
+  overflow: hidden;
+  background: var(--sg-panel-bg) !important;
+  border: 1px solid var(--sg-panel-border) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--sg-panel-shadow) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+}
+
+html.staging-ui .panel::before,
+html.staging-ui .stat-card::before,
+html.staging-ui .result-panel::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 0 0 auto;
+  height: 42%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent) !important;
+  opacity: 0.72;
+}
+
+html.staging-ui .stat-card:hover,
+html.staging-ui .history-item:hover,
+html.staging-ui .panel:hover {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.5)) !important;
+  border-color: rgba(255, 255, 255, 0.96) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 18px 50px rgba(67, 78, 112, 0.12) !important;
+  transform: translateY(-2px);
+}
+
+html.staging-ui .stat-value {
+  color: #232938 !important;
+  letter-spacing: -0.025em !important;
+}
+
+/* 交互控件更像透明树脂 */
+html.staging-ui input,
+html.staging-ui select,
+html.staging-ui textarea,
+html.staging-ui .audit-reviewer-input-wrap {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.58)) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 1px 2px rgba(30, 41, 59, 0.05) !important;
+}
+
+html.staging-ui input:focus,
+html.staging-ui select:focus,
+html.staging-ui textarea:focus,
+html.staging-ui .audit-reviewer-input-wrap:focus-within {
+  border-color: rgba(100, 123, 242, 0.52) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  box-shadow:
+    0 0 0 4px rgba(79, 110, 247, 0.1),
+    0 12px 30px rgba(67, 78, 112, 0.08),
+    inset 0 1px 0 #fff !important;
+}
+
+html.staging-ui .btn-primary,
+html.staging-ui .chat-mod-send.agent-send-btn,
+html.staging-ui .renewal-send-btn.agent-send-btn,
+html.staging-ui .gh-home-send {
+  background:
+    linear-gradient(145deg, rgba(112, 135, 250, 0.96), rgba(70, 95, 224, 0.96)) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.36) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    0 7px 18px rgba(79, 110, 247, 0.24) !important;
+}
+
+html.staging-ui .btn-primary:hover,
+html.staging-ui .chat-mod-send.agent-send-btn:hover,
+html.staging-ui .renewal-send-btn.agent-send-btn:hover,
+html.staging-ui .gh-home-send:hover {
+  filter: brightness(1.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.46),
+    0 10px 26px rgba(79, 110, 247, 0.32) !important;
+}
+
+/* 首页视觉焦点 */
+html.staging-ui .gh-home-shell {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.82), transparent 32%),
+    radial-gradient(circle at 36% 36%, rgba(139, 124, 246, 0.13), transparent 25%),
+    radial-gradient(circle at 66% 58%, rgba(80, 188, 227, 0.12), transparent 28%),
+    transparent !important;
+}
+
+html.staging-ui .gh-home-shell::before,
+html.staging-ui .gh-home-shell::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(4px);
+}
+
+html.staging-ui .gh-home-shell::before {
+  width: min(480px, 48vw);
+  height: min(480px, 48vw);
+  left: 12%;
+  top: 10%;
+  background: radial-gradient(circle at 36% 34%, rgba(255, 255, 255, 0.78), rgba(139, 124, 246, 0.12) 45%, transparent 68%);
+}
+
+html.staging-ui .gh-home-shell::after {
+  width: min(420px, 42vw);
+  height: min(420px, 42vw);
+  right: 9%;
+  bottom: 5%;
+  background: radial-gradient(circle at 42% 36%, rgba(255, 255, 255, 0.76), rgba(80, 188, 227, 0.11) 46%, transparent 68%);
+}
+
+html.staging-ui .gh-home-composer-wrap {
+  filter: drop-shadow(0 24px 38px rgba(59, 71, 109, 0.11));
+}
+
+html.staging-ui .gh-home-composer {
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.48)) !important;
+  border-color: rgba(255, 255, 255, 0.92) !important;
+  border-radius: 22px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.28),
+    0 20px 60px rgba(62, 73, 105, 0.1) !important;
+  backdrop-filter: blur(30px) saturate(195%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(195%) !important;
+}
+
+html.staging-ui .gh-home-composer:focus-within,
+html.staging-ui .gh-home-composer.gh-home-composer-expanded {
+  border-color: rgba(119, 137, 237, 0.5) !important;
+  box-shadow:
+    0 0 0 5px rgba(93, 117, 240, 0.09),
+    inset 0 1px 0 #fff,
+    0 30px 76px rgba(62, 73, 105, 0.15) !important;
+}
+
+html.staging-ui .gh-home-badge,
+html.staging-ui .staging-env-badge,
+html.staging-ui .status-badge,
+html.staging-ui .strategy-meta-badge {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.5)) !important;
+  border-color: rgba(255, 255, 255, 0.88) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 4px 14px rgba(67, 78, 112, 0.06) !important;
+}
+
+/* 聊天页：玻璃气泡、浮动输入区 */
+html.staging-ui .agent-chat-shell {
+  background:
+    radial-gradient(circle at 12% 4%, rgba(139, 124, 246, 0.1), transparent 24%),
+    radial-gradient(circle at 88% 92%, rgba(80, 188, 227, 0.1), transparent 28%),
+    linear-gradient(155deg, rgba(247, 248, 252, 0.7), rgba(235, 240, 248, 0.58)) !important;
+}
+
+html.staging-ui .agent-chat-header {
+  background: rgba(255, 255, 255, 0.46) !important;
+  backdrop-filter: blur(24px) saturate(185%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(185%) !important;
+}
+
+html.staging-ui .agent-msg-bubble {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.48)) !important;
+  border-color: rgba(255, 255, 255, 0.86) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 10px 34px rgba(65, 76, 108, 0.075) !important;
+}
+
+html.staging-ui .agent-msg-user .agent-msg-bubble {
+  background:
+    linear-gradient(145deg, rgba(226, 232, 255, 0.88), rgba(213, 224, 255, 0.62)) !important;
+  border-color: rgba(255, 255, 255, 0.82) !important;
+}
+
+html.staging-ui .agent-chat-composer {
+  margin: 0 14px 14px !important;
+  width: calc(100% - 28px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.68) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 12px 38px rgba(63, 74, 108, 0.08) !important;
+}
+
+html.staging-ui .chat-mod-input-glow,
+html.staging-ui .renewal-input-glow {
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.52)) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 17px !important;
+}
+
+/* 浮层必须比背景更实，保证层次和可读性 */
+html.staging-ui .postpone-modal-backdrop,
+html.staging-ui .audit-whitelist-modal-backdrop,
+html.staging-ui .handbook-diagram-modal {
+  background: rgba(224, 229, 240, 0.54) !important;
+  backdrop-filter: blur(16px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+}
+
+html.staging-ui .postpone-modal-panel,
+html.staging-ui .audit-whitelist-modal-panel,
+html.staging-ui .handbook-diagram-modal-panel {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(247, 249, 253, 0.78)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.96) !important;
+  border-radius: 22px !important;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 28px 90px rgba(50, 61, 94, 0.18) !important;
+  backdrop-filter: blur(34px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(180%) !important;
+}
+
+@media (max-width: 900px) {
+  html.staging-ui {
+    --sg-page-gap: 8px;
+  }
+
+  html.staging-ui .sidebar {
+    height: 100dvh !important;
+    border-radius: 0 20px 20px 0 !important;
+  }
+
+  html.staging-ui .main {
+    height: calc(100dvh - 16px) !important;
+  }
+
+  html.staging-ui .content {
+    padding: 16px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+ * Cursor Light × Glass · v3
+ * 暖灰白底 + 玻璃层级；去掉首页双层白框；聊天输入对齐 Cursor
+ * ═══════════════════════════════════════════════════════ */
+
+html.staging-ui {
+  --cu-bg: #f7f7f4;
+  --cu-bg-2: #f0f0eb;
+  --cu-panel: rgba(255, 255, 255, 0.62);
+  --cu-panel-strong: rgba(255, 255, 255, 0.78);
+  --cu-text: #1a1a1a;
+  --cu-text-muted: #5c5c5c;
+  --cu-text-subtle: #8a8a8a;
+  --cu-border: rgba(26, 26, 26, 0.08);
+  --cu-border-strong: rgba(26, 26, 26, 0.12);
+  --cu-accent: #26251e;
+  --cu-focus: rgba(38, 37, 30, 0.14);
+  --cu-user-bubble: rgba(38, 37, 30, 0.06);
+  --cu-glass-blur: blur(28px) saturate(160%);
+  --cu-shadow: 0 1px 0 rgba(255, 255, 255, 0.85) inset, 0 8px 28px rgba(26, 26, 26, 0.05);
+  --cu-shadow-soft: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 4px 18px rgba(26, 26, 26, 0.04);
+}
+
+html.staging-ui,
+html.staging-ui body {
+  color: var(--cu-text) !important;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 0%, rgba(255, 255, 255, 0.7), transparent 55%),
+    radial-gradient(ellipse 55% 40% at 90% 10%, rgba(232, 232, 224, 0.55), transparent 50%),
+    linear-gradient(160deg, var(--cu-bg) 0%, #f3f3ef 48%, var(--cu-bg-2) 100%) !important;
+}
+
+html.staging-ui body::before,
+html.staging-ui body::after {
+  opacity: 0.55 !important;
+  background: transparent !important;
+}
+
+html.staging-ui body::before {
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.5), transparent 42%),
+    radial-gradient(circle at 78% 80%, rgba(236, 236, 230, 0.45), transparent 40%) !important;
+}
+
+html.staging-ui .sidebar {
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.72),
+    rgba(247, 247, 244, 0.48)
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  box-shadow: var(--cu-shadow) !important;
+  backdrop-filter: var(--cu-glass-blur) !important;
+  -webkit-backdrop-filter: var(--cu-glass-blur) !important;
+}
+
+html.staging-ui .nav-item {
+  color: var(--cu-text-muted) !important;
+}
+
+html.staging-ui .nav-item:hover:not(.disabled) {
+  color: var(--cu-text) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  box-shadow: var(--cu-shadow-soft) !important;
+}
+
+html.staging-ui .nav-item.active {
+  color: var(--cu-text) !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  border-color: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: var(--cu-shadow-soft) !important;
+}
+
+html.staging-ui .nav-item.active .nav-icon {
+  color: var(--cu-text) !important;
+}
+
+html.staging-ui .main {
+  background: rgba(255, 255, 255, 0.28) !important;
+  border-color: rgba(255, 255, 255, 0.65) !important;
+  box-shadow: var(--cu-shadow) !important;
+}
+
+html.staging-ui .topbar {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.7),
+    rgba(247, 247, 244, 0.45)
+  ) !important;
+  border-bottom-color: var(--cu-border) !important;
+}
+
+html.staging-ui .panel,
+html.staging-ui .stat-card,
+html.staging-ui .result-panel,
+html.staging-ui .history-item,
+html.staging-ui .audit-card,
+html.staging-ui section.panel {
+  background: var(--cu-panel) !important;
+  border-color: rgba(255, 255, 255, 0.75) !important;
+  box-shadow: var(--cu-shadow) !important;
+}
+
+html.staging-ui .page-header h1,
+html.staging-ui .agent-chat-header h1,
+html.staging-ui #breadcrumbCurrent {
+  color: var(--cu-text) !important;
+}
+
+html.staging-ui .page-header p,
+html.staging-ui .agent-chat-header p,
+html.staging-ui .breadcrumb,
+html.staging-ui .nav-label {
+  color: var(--cu-text-muted) !important;
+}
+
+html.staging-ui .btn-primary {
+  background: var(--cu-accent) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #f7f7f4 !important;
+  box-shadow: 0 4px 14px rgba(26, 26, 26, 0.14) !important;
+}
+
+html.staging-ui .btn-primary:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 18px rgba(26, 26, 26, 0.18) !important;
+}
+
+html.staging-ui .btn-ghost,
+html.staging-ui .btn-sm {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-color: var(--cu-border) !important;
+  color: var(--cu-text) !important;
+}
+
+/* ── 首页输入：单层玻璃，去掉放大/蓝环/双白框 ── */
+html.staging-ui .gh-home-shell {
+  background: transparent !important;
+}
+
+html.staging-ui .gh-home-shell::before,
+html.staging-ui .gh-home-shell::after {
+  opacity: 0.35;
+  filter: blur(18px);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.55),
+    rgba(240, 240, 235, 0.2) 48%,
+    transparent 70%
+  ) !important;
+}
+
+html.staging-ui .gh-home-composer-wrap {
+  filter: drop-shadow(0 24px 38px rgba(59, 71, 109, 0.11));
+  transform-origin: center center !important;
+  transition: width 0.22s ease, transform 0.22s ease, filter 0.22s ease !important;
+}
+
+html.staging-ui .gh-home-composer-wrap:has(.gh-home-composer:focus-within),
+html.staging-ui .gh-home-composer-wrap:has(.gh-home-composer-expanded) {
+  width: 780px !important;
+  max-width: calc(100% - 32px) !important;
+  transform: scale(1.04) !important;
+  filter: drop-shadow(0 28px 48px rgba(59, 71, 109, 0.16));
+}
+
+html.staging-ui .gh-home-composer,
+html.staging-ui .gh-home-composer:focus-within,
+html.staging-ui .gh-home-composer.gh-home-composer-expanded {
+  height: 168px !important;
+  border-radius: 18px !important;
+  border: 1px solid var(--cu-border) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  box-shadow: var(--cu-shadow-soft) !important;
+  backdrop-filter: var(--cu-glass-blur) !important;
+  -webkit-backdrop-filter: var(--cu-glass-blur) !important;
+  outline: none !important;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    height 0.22s ease,
+    background 0.22s ease !important;
+}
+
+html.staging-ui .gh-home-composer:focus-within,
+html.staging-ui .gh-home-composer.gh-home-composer-expanded {
+  height: 208px !important;
+  border-color: var(--cu-border-strong) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  box-shadow:
+    0 0 0 3px var(--cu-focus),
+    var(--cu-shadow) !important;
+}
+
+html.staging-ui .gh-home-input,
+html.staging-ui .gh-home-input:focus {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: var(--cu-text) !important;
+}
+
+html.staging-ui .gh-home-input::placeholder {
+  color: var(--cu-text-subtle) !important;
+}
+
+html.staging-ui .gh-home-badge {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border-color: var(--cu-border) !important;
+  color: var(--cu-text-muted) !important;
+  box-shadow: none !important;
+}
+
+html.staging-ui .gh-home-feature {
+  background: rgba(255, 255, 255, 0.45) !important;
+  border-color: var(--cu-border) !important;
+  border-radius: 999px !important;
+  color: var(--cu-text-muted) !important;
+}
+
+html.staging-ui .gh-home-feature:hover,
+html.staging-ui .gh-home-feature[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-color: var(--cu-border-strong) !important;
+}
+
+html.staging-ui .gh-home-feature-menu {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: var(--cu-border) !important;
+  box-shadow: var(--cu-shadow) !important;
+  backdrop-filter: var(--cu-glass-blur) !important;
+}
+
+html.staging-ui .gh-home-feature-option.is-active {
+  background: rgba(38, 37, 30, 0.07) !important;
+  color: var(--cu-text) !important;
+}
+
+html.staging-ui .gh-home-send,
+html.staging-ui .gh-home-send:hover,
+html.staging-ui .gh-home-composer:focus-within .gh-home-send {
+  background: var(--cu-accent) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  color: #f7f7f4 !important;
+  box-shadow: 0 2px 8px rgba(26, 26, 26, 0.16) !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* ── 功能模块聊天：Cursor 风格 ── */
+html.staging-ui .agent-chat-shell {
+  background: linear-gradient(
+    180deg,
+    rgba(247, 247, 244, 0.55),
+    rgba(240, 240, 235, 0.35)
+  ) !important;
+  border: none !important;
+}
+
+html.staging-ui .agent-chat-header {
+  background: rgba(255, 255, 255, 0.42) !important;
+  border-bottom: 1px solid var(--cu-border) !important;
+  backdrop-filter: var(--cu-glass-blur) !important;
+  -webkit-backdrop-filter: var(--cu-glass-blur) !important;
+}
+
+html.staging-ui .agent-chat-messages {
+  padding: 20px 28px 12px !important;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+html.staging-ui .agent-msg {
+  margin: 0 0 14px !important;
+}
+
+html.staging-ui .agent-msg-assistant .agent-msg-bubble,
+html.staging-ui .agent-msg-system .agent-msg-bubble {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 4px 2px !important;
+  color: var(--cu-text) !important;
+}
+
+html.staging-ui .agent-msg-user {
+  justify-content: flex-end !important;
+}
+
+html.staging-ui .agent-msg-user .agent-msg-bubble {
+  background: var(--cu-user-bubble) !important;
+  border: 1px solid var(--cu-border) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  max-width: min(72%, 560px) !important;
+  padding: 12px 14px !important;
+  color: var(--cu-text) !important;
+}
+
+html.staging-ui .agent-msg-err .agent-msg-bubble {
+  background: rgba(220, 38, 38, 0.06) !important;
+  border: 1px solid rgba(220, 38, 38, 0.16) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+
+html.staging-ui .agent-msg-ok .agent-msg-bubble {
+  background: rgba(22, 163, 74, 0.06) !important;
+  border: 1px solid rgba(22, 163, 74, 0.14) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+
+html.staging-ui .agent-msg-bubble-thinking {
+  color: var(--cu-text-subtle) !important;
+}
+
+/* 底部输入：单层玻璃胶囊，去掉内层纯白框 */
+html.staging-ui .agent-chat-composer,
+html.staging-ui .agent-chat-composer.chat-mod-composer,
+html.staging-ui .agent-chat-composer.renewal-composer,
+html.staging-ui .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
+html.staging-ui .agent-chat-shell .agent-chat-composer.renewal-composer:focus-within {
+  margin: 0 auto 18px !important;
+  width: min(860px, calc(100% - 40px)) !important;
+  max-width: min(860px, calc(100% - 40px)) !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.staging-ui .chat-mod-input-shell,
+html.staging-ui .renewal-input-shell {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+html.staging-ui .chat-mod-input-glow,
+html.staging-ui .renewal-input-glow,
+html.staging-ui .chat-mod-input-glow:focus-within,
+html.staging-ui .renewal-input-glow:focus-within {
+  height: auto !important;
+  min-height: 112px !important;
+  padding: 0 !important;
+  border-radius: 18px !important;
+  border: 1px solid var(--cu-border) !important;
+  background: rgba(255, 255, 255, 0.58) !important;
+  box-shadow: var(--cu-shadow-soft) !important;
+  backdrop-filter: var(--cu-glass-blur) !important;
+  -webkit-backdrop-filter: var(--cu-glass-blur) !important;
+  animation: none !important;
+}
+
+html.staging-ui .chat-mod-input-glow:focus-within,
+html.staging-ui .renewal-input-glow:focus-within {
+  border-color: var(--cu-border-strong) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  box-shadow:
+    0 0 0 3px var(--cu-focus),
+    var(--cu-shadow) !important;
+}
+
+html.staging-ui .chat-mod-input-inner,
+html.staging-ui .renewal-input-inner,
+html.staging-ui .chat-mod-input-glow:focus-within .chat-mod-input-inner,
+html.staging-ui .renewal-input-glow:focus-within .renewal-input-inner {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 18px !important;
+}
+
+html.staging-ui .chat-mod-input,
+html.staging-ui .renewal-chat-input,
+html.staging-ui .chat-mod-input:focus,
+html.staging-ui .renewal-chat-input:focus,
+html.staging-ui .agent-chat-input {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: var(--cu-text) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.staging-ui .chat-mod-input::placeholder,
+html.staging-ui .renewal-chat-input::placeholder {
+  color: var(--cu-text-subtle) !important;
+}
+
+html.staging-ui .chat-mod-send.agent-send-btn,
+html.staging-ui .renewal-send-btn.agent-send-btn {
+  background: rgba(38, 37, 30, 0.18) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+html.staging-ui .chat-mod-input-glow:focus-within .chat-mod-send.agent-send-btn,
+html.staging-ui .renewal-input-glow:focus-within .renewal-send-btn.agent-send-btn,
+html.staging-ui .chat-mod-send.agent-send-btn.is-active,
+html.staging-ui .renewal-send-btn.agent-send-btn.is-active,
+html.staging-ui .chat-mod-send.agent-send-btn:hover,
+html.staging-ui .renewal-send-btn.agent-send-btn:hover {
+  background: var(--cu-accent) !important;
+  color: #f7f7f4 !important;
+  box-shadow: 0 2px 8px rgba(26, 26, 26, 0.16) !important;
+  filter: none !important;
+}
+
+html.staging-ui .renewal-postpone-btn,
+html.staging-ui .audit-whitelist-inline {
+  background: rgba(255, 255, 255, 0.45) !important;
+  border-color: var(--cu-border) !important;
+  color: var(--cu-text-muted) !important;
+  border-radius: 999px !important;
+}
+
+html.staging-ui .renewal-postpone-btn:hover,
+html.staging-ui .renewal-postpone-btn.is-active,
+html.staging-ui .audit-whitelist-inline:hover {
+  background: rgba(38, 37, 30, 0.06) !important;
+  border-color: var(--cu-border-strong) !important;
+  color: var(--cu-text) !important;
+}
+
+html.staging-ui .strategy-meta-badge,
+html.staging-ui .staging-env-badge,
+html.staging-ui .status-badge {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border-color: var(--cu-border) !important;
+  color: var(--cu-text-muted) !important;
+  box-shadow: none !important;
+}
+
+html.staging-ui .strategy-card,
+html.staging-ui .strategy-agg-bucket,
+html.staging-ui .audit-card {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border: 1px solid var(--cu-border) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--cu-shadow-soft) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+@media (max-width: 768px) {
+  html.staging-ui .gh-home-composer-wrap,
+  html.staging-ui .gh-home-composer-wrap:has(.gh-home-composer:focus-within),
+  html.staging-ui .gh-home-composer-wrap:has(.gh-home-composer-expanded) {
+    width: 100% !important;
+  }
+
+  html.staging-ui .agent-chat-messages {
+    padding: 16px 14px 8px !important;
+  }
+
+  html.staging-ui .agent-chat-composer,
+  html.staging-ui .agent-chat-composer.chat-mod-composer,
+  html.staging-ui .agent-chat-composer.renewal-composer {
+    width: calc(100% - 24px) !important;
+    max-width: calc(100% - 24px) !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+ * v4 · 聊天布局 / 搜索条 / 手册目录固定
+ * 注意：不得用 display:flex !important 覆盖 .view.hidden
+ * ═══════════════════════════════════════════════════════ */
+
+html.staging-ui.staging-compact-chat .view.hidden {
+  display: none !important;
+}
+
+html.staging-ui.staging-compact-chat .main {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 仅全屏聊天 / 首页：content 参与 flex 高度链（产品手册保持默认滚动布局） */
+html.staging-ui.staging-compact-chat .content.content-home,
+html.staging-ui.staging-compact-chat .content.content-strategy-query {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+}
+
+html.staging-ui.staging-compact-chat #viewStrategyQuery:not(.hidden),
+html.staging-ui.staging-compact-chat #viewStrategyAudit:not(.hidden),
+html.staging-ui.staging-compact-chat #viewStrategyRenewal:not(.hidden) {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+html.staging-ui.staging-compact-chat .agent-chat-shell {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
+  gap: 0 !important;
+}
+
+html.staging-ui.staging-compact-chat .agent-chat-messages {
+  flex: 0 1 auto !important;
+  min-height: 0 !important;
+  max-height: min(44vh, calc(100dvh - 340px)) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 4px 20px 8px !important;
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  align-items: stretch !important;
+}
+
+html.staging-ui.staging-compact-chat .agent-msg {
+  max-width: min(860px, 100%) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 100% !important;
+}
+
+html.staging-ui.staging-compact-chat .agent-msg-system .agent-msg-bubble,
+html.staging-ui.staging-compact-chat .agent-msg-assistant .agent-msg-bubble {
+  padding: 2px 0 !important;
+}
+
+html.staging-ui.staging-compact-chat .module-hint-line {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--cu-text-muted, #5c5c5c);
+}
+
+html.staging-ui.staging-compact-chat .module-hint-line code {
+  font-size: 12px;
+}
+
+/* 底部输入：固定在可视区内 */
+html.staging-ui.staging-compact-chat .agent-chat-composer,
+html.staging-ui.staging-compact-chat .agent-chat-composer.chat-mod-composer,
+html.staging-ui.staging-compact-chat .agent-chat-composer.renewal-composer {
+  flex-shrink: 0 !important;
+  width: min(860px, calc(100% - 32px)) !important;
+  max-width: min(860px, calc(100% - 32px)) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+}
+
+/* 审核人搜索：聊天区左上角 */
+html.staging-ui.staging-compact-chat .module-search-bar-top {
+  flex-shrink: 0 !important;
+  width: min(300px, calc(100% - 40px)) !important;
+  max-width: min(300px, calc(100% - 40px)) !important;
+  margin: 2px 0 6px 20px !important;
+  padding: 0 !important;
+  align-self: flex-start !important;
+}
+
+html.staging-ui.staging-compact-chat .module-search-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--cu-text, #1a1a1a);
+}
+
+html.staging-ui.staging-compact-chat .module-search-bar .audit-reviewer-combobox {
+  width: 100% !important;
+}
+
+html.staging-ui.staging-compact-chat .module-search-bar .audit-reviewer-input-wrap {
+  min-height: 44px !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid var(--cu-border, rgba(26, 26, 26, 0.08)) !important;
+  box-shadow: var(--cu-shadow-soft) !important;
+}
+
+html.staging-ui.staging-compact-chat .module-search-bar .audit-reviewer-input-wrap:focus-within {
+  border-color: var(--cu-border-strong, rgba(26, 26, 26, 0.12)) !important;
+  box-shadow: 0 0 0 3px var(--cu-focus, rgba(38, 37, 30, 0.14)), var(--cu-shadow-soft) !important;
+}
+
+html.staging-ui.staging-compact-chat .agent-chat-composer {
+  margin-top: 8px !important;
+  margin-bottom: 20px !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-input-shell,
+html.staging-ui.staging-compact-chat .renewal-input-shell {
+  width: 100% !important;
+  max-width: 100% !important;
+  transform: none !important;
+  transform-origin: center center !important;
+  transition: none !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-input-glow:focus-within,
+html.staging-ui.staging-compact-chat .renewal-input-glow:focus-within {
+  transform: none !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-input-glow,
+html.staging-ui.staging-compact-chat .renewal-input-glow {
+  min-height: 96px !important;
+  height: auto !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-input,
+html.staging-ui.staging-compact-chat .renewal-chat-input {
+  min-height: 72px !important;
+  max-height: 120px !important;
+  height: auto !important;
+}
+
+html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-header-actions {
+  gap: 8px !important;
+}
+
+/* 诊断 / 记录等普通页：保持可滚动与内边距 */
+html.staging-ui.staging-compact-chat .content:has(#viewDiagnosis:not(.hidden)),
+html.staging-ui.staging-compact-chat .content:has(#viewHistory:not(.hidden)),
+html.staging-ui.staging-compact-chat .content:has(#viewFunnelBiSQL:not(.hidden)) {
+  overflow-y: auto !important;
+  padding: 22px !important;
+  display: block !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+ * v5 · 文字对比度 / 侧栏选中态
+ * ═══════════════════════════════════════════════════════ */
+
+html.staging-ui {
+  --cu-text: #101010;
+  --cu-text-muted: #333333;
+  --cu-text-subtle: #4a4a4a;
+  --sg-text: #101010;
+  --sg-text-muted: #333333;
+  --sg-text-subtle: #4a4a4a;
+  --cu-border: rgba(16, 16, 16, 0.12);
+  --cu-border-strong: rgba(16, 16, 16, 0.18);
+}
+
+html.staging-ui,
+html.staging-ui body,
+html.staging-ui .nav-item,
+html.staging-ui .breadcrumb,
+html.staging-ui .page-header h1,
+html.staging-ui .agent-chat-header h1,
+html.staging-ui #breadcrumbCurrent {
+  color: var(--cu-text) !important;
+}
+
+html.staging-ui .page-header p,
+html.staging-ui .agent-chat-header p,
+html.staging-ui .nav-label,
+html.staging-ui .breadcrumb,
+html.staging-ui .module-hint-line,
+html.staging-ui .agent-msg-assistant .agent-msg-bubble,
+html.staging-ui .agent-msg-system .agent-msg-bubble {
+  color: var(--cu-text-muted) !important;
+}
+
+html.staging-ui .nav-item {
+  color: #2b2b2b !important;
+  font-weight: 500 !important;
+}
+
+html.staging-ui .nav-item:hover:not(.disabled) {
+  color: #101010 !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+}
+
+html.staging-ui .nav-item.active {
+  color: #080808 !important;
+  font-weight: 650 !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(16, 16, 16, 0.16) !important;
+  box-shadow:
+    0 2px 10px rgba(16, 16, 16, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.95) !important;
+}
+
+html.staging-ui .nav-item.active .nav-icon {
+  color: #080808 !important;
+}
+
+html.staging-ui .nav-label {
+  color: #4a4a4a !important;
+  font-weight: 600 !important;
+}
+
+/* handbook toc 对比度见上方「手册 / 表格」专属规则 */
+
+/* ═══════════════════════════════════════════════════════
+ * v6 · 玻璃拟态增强（面板 / 卡片 / 聊天块）
+ * ═══════════════════════════════════════════════════════ */
+
+html.staging-ui {
+  --sg-glass-blur-strong: blur(34px) saturate(190%);
+  --sg-glass-surface: linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.46));
+  --sg-glass-surface-strong: linear-gradient(150deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.58));
+  --sg-glass-edge: rgba(255, 255, 255, 0.88);
+  --sg-glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.22),
+    0 10px 32px rgba(26, 26, 26, 0.07);
+}
+
+html.staging-ui .panel,
+html.staging-ui .stat-card,
+html.staging-ui .result-panel,
+html.staging-ui .history-item,
+html.staging-ui .audit-card,
+html.staging-ui section.panel,
+html.staging-ui .strategy-card,
+html.staging-ui .strategy-agg-bucket,
+html.staging-ui .fb-toolbar,
+html.staging-ui .fb-result,
+html.staging-ui .agent-chat-header,
+html.staging-ui .module-search-bar .audit-reviewer-input-wrap,
+html.staging-ui .chat-mod-input-glow,
+html.staging-ui .renewal-input-glow,
+html.staging-ui .gh-home-composer,
+html.staging-ui .agent-msg-user .agent-msg-bubble,
+html.staging-ui .agent-msg-ok .agent-msg-bubble,
+html.staging-ui .agent-msg-err .agent-msg-bubble {
+  background: var(--sg-glass-surface) !important;
+  border: 1px solid var(--sg-glass-edge) !important;
+  box-shadow: var(--sg-glass-shadow) !important;
+  backdrop-filter: var(--sg-glass-blur-strong) !important;
+  -webkit-backdrop-filter: var(--sg-glass-blur-strong) !important;
+}
+
+html.staging-ui .panel,
+html.staging-ui .stat-card,
+html.staging-ui .result-panel,
+html.staging-ui .history-item,
+html.staging-ui .audit-card,
+html.staging-ui section.panel,
+html.staging-ui .strategy-card {
+  position: relative;
+  overflow: hidden;
+}
+
+html.staging-ui .chat-mod-input-glow,
+html.staging-ui .renewal-input-glow,
+html.staging-ui .gh-home-composer {
+  position: relative;
+  overflow: hidden;
+}
+
+html.staging-ui .panel::after,
+html.staging-ui .stat-card::after,
+html.staging-ui .result-panel::after,
+html.staging-ui .history-item::after,
+html.staging-ui .audit-card::after,
+html.staging-ui .strategy-card::after,
+html.staging-ui .chat-mod-input-glow::after,
+html.staging-ui .renewal-input-glow::after,
+html.staging-ui .gh-home-composer::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 0 0 auto;
+  height: 46%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent) !important;
+}
+
+html.staging-ui .panel:hover,
+html.staging-ui .stat-card:hover,
+html.staging-ui .history-item:hover,
+html.staging-ui .audit-card:hover {
+  background: var(--sg-glass-surface-strong) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 14px 36px rgba(26, 26, 26, 0.1) !important;
+}
+
+html.staging-ui.staging-compact-chat .agent-chat-shell {
+  background: transparent !important;
+  align-items: center !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+ * v7 · 三模块聊天：单一玻璃卡片
+ * ═══════════════════════════════════════════════════════ */
+
+/* 三个模块 header 整块移除（标题/徽标都不显示） */
+html.staging-ui.staging-compact-chat #viewStrategyQuery .agent-chat-header,
+html.staging-ui.staging-compact-chat #viewStrategyAudit .agent-chat-header,
+html.staging-ui.staging-compact-chat #viewStrategyRenewal .agent-chat-header {
+  display: none !important;
+}
+
+/* 侧栏「能力模块」分组上方的横线去掉（含分组卡片边框） */
+html.staging-ui .nav-group + .nav-group {
+  border-top: none !important;
+  padding-top: 6px !important;
+}
+
+html.staging-ui .nav-group {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* 聊天卡片：垂直居中、略微偏下 */
+html.staging-ui.staging-compact-chat #viewStrategyQuery .agent-chat-shell,
+html.staging-ui.staging-compact-chat #viewStrategyAudit .agent-chat-shell,
+html.staging-ui.staging-compact-chat #viewStrategyRenewal .agent-chat-shell {
+  justify-content: center !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-panel {
+  position: relative;
+  flex: 0 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: min(860px, calc(100% - 32px)) !important;
+  max-width: min(860px, calc(100% - 32px)) !important;
+  margin: 7vh auto 0 !important;
+  overflow: hidden;
+  border-radius: 20px !important;
+  background: var(--sg-glass-surface) !important;
+  border: 1px solid var(--sg-glass-edge) !important;
+  box-shadow: var(--sg-glass-shadow) !important;
+  backdrop-filter: var(--sg-glass-blur-strong) !important;
+  -webkit-backdrop-filter: var(--sg-glass-blur-strong) !important;
+}
+
+/* v12 · 正式环境：输入框固定红区底部；执行流程独立上方，互不影响 */
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyQuery .agent-chat-shell,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .agent-chat-shell,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .agent-chat-shell {
+  position: relative !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  overflow: hidden !important;
+}
+
+/* ① 输入框：固定钉在红圈位置（底部居中），整体上移 40px；执行流程出现也不移动 */
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyQuery .chat-mod-panel,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .chat-mod-panel,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .chat-mod-panel {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 96px !important;
+  top: auto !important;
+  transform: translateX(-50%) !important;
+  margin: 0 !important;
+  width: min(860px, calc(100% - 32px)) !important;
+  max-width: min(860px, calc(100% - 32px)) !important;
+  z-index: 30 !important;
+}
+
+/* ② 执行流程：固定 1200×670，可上下滚动（输入框不动） */
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyQuery .module-flow-results,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .module-flow-results,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .module-flow-results {
+  position: absolute !important;
+  left: 50% !important;
+  top: 12px !important;
+  transform: translateX(-50%) !important;
+  flex: none !important;
+  width: 1200px !important;
+  max-width: calc(100% - 32px) !important;
+  height: 670px !important;
+  max-height: 670px !important;
+  min-height: 670px !important;
+  margin: 0 !important;
+  padding: 16px 18px 16px 16px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+  z-index: 10 !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(16, 16, 16, 0.06) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(10px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(130%) !important;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: rgba(16, 16, 16, 0.42) rgba(16, 16, 16, 0.08);
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+/* 执行流程右侧滑动块标识 */
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results::-webkit-scrollbar {
+  width: 10px;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results::-webkit-scrollbar-track {
+  background: rgba(16, 16, 16, 0.08);
+  border-radius: 999px;
+  margin: 8px 0;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results::-webkit-scrollbar-thumb {
+  background: rgba(16, 16, 16, 0.38);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 16, 16, 0.55);
+  background-clip: padding-box;
+}
+
+/* 无执行内容时不展现执行流程框 */
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results.is-empty {
+  display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 执行流程右侧滑动块标识（覆盖旧的细滚动条） */
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results::-webkit-scrollbar {
+  width: 10px;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results::-webkit-scrollbar-track {
+  background: rgba(16, 16, 16, 0.08);
+  border-radius: 999px;
+  margin: 8px 0;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results::-webkit-scrollbar-thumb {
+  background: rgba(16, 16, 16, 0.38);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 16, 16, 0.55);
+  background-clip: padding-box;
+}
+
+/* 时间线轨道 */
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg {
+  position: relative !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 0 14px !important;
+  padding-left: 18px !important;
+  animation: flow-msg-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg:nth-child(1) { animation-delay: 0.02s; }
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg:nth-child(2) { animation-delay: 0.06s; }
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg:nth-child(3) { animation-delay: 0.1s; }
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg:nth-child(4) { animation-delay: 0.14s; }
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg:nth-child(5) { animation-delay: 0.18s; }
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg:nth-child(n + 6) { animation-delay: 0.22s; }
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 3px !important;
+  top: 8px !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: #3d4fbf !important;
+  box-shadow: 0 0 0 3px rgba(61, 79, 191, 0.14) !important;
+  z-index: 2 !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 6px !important;
+  top: 20px !important;
+  bottom: -14px !important;
+  width: 2px !important;
+  border-radius: 2px !important;
+  background: linear-gradient(180deg, rgba(61, 79, 191, 0.28), rgba(61, 79, 191, 0.05)) !important;
+  z-index: 1 !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg:last-child::after {
+  display: none !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg-user {
+  display: none !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg-ok::before {
+  background: #059669 !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.16) !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg-err::before {
+  background: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.14) !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg-bubble,
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg-content {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: #1f2328 !important;
+  font-size: 13.5px !important;
+  line-height: 1.65 !important;
+  letter-spacing: 0.01em !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg-content p {
+  margin: 0 0 6px !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg-content p:last-child {
+  margin-bottom: 0 !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg-content code {
+  display: inline-block !important;
+  padding: 1px 6px !important;
+  border-radius: 5px !important;
+  font-size: 12px !important;
+  color: #242936 !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid rgba(16, 16, 16, 0.08) !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-muted,
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg-content .muted {
+  color: #6b7280 !important;
+}
+
+@keyframes flow-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.staging-ui.staging-compact-chat:not(.staging-dev) .module-flow-results .agent-msg {
+    animation: none !important;
+  }
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-input-block .module-hint-slot {
+  position: relative;
+  z-index: 1;
+  padding: 12px 14px 8px !important;
+  margin: 0 !important;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #333333;
+  box-sizing: border-box;
+  letter-spacing: 0.01em;
+}
+
+html.staging-ui.staging-compact-chat .module-input-block .module-hint-slot .module-hint-line,
+html.staging-ui.staging-compact-chat .chat-mod-panel .module-hint-line,
+html.staging-ui.staging-dev.staging-compact-chat .module-input-block .module-hint-slot .module-hint-line {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 5px 10px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(59, 130, 246, 0.18) !important;
+  background: #e6effd !important;
+  color: rgba(30, 41, 59, 0.92) !important;
+  font-size: 11.5px !important;
+  line-height: 1.4 !important;
+  box-sizing: border-box !important;
+}
+
+html.staging-ui.staging-compact-chat .module-input-block .module-hint-slot .module-hint-line code,
+html.staging-ui.staging-compact-chat .chat-mod-panel .module-hint-line code {
+  background: rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid rgba(59, 130, 246, 0.16) !important;
+  border-radius: 4px !important;
+  padding: 0 4px !important;
+  font-size: 11px !important;
+}
+
+/* 提示文案与下方输入框拉开间距，增加层次感 */
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-input-block .module-hint-slot + .agent-chat-composer,
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-input-block .module-hint-slot + .module-search-bar-top,
+html.staging-ui.staging-compact-chat:not(.staging-dev) .chat-mod-panel .agent-chat-messages {
+  margin-top: 4px !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-input-block .agent-chat-composer {
+  padding: 4px 14px 18px !important;
+}
+
+html.staging-ui.staging-compact-chat:not(.staging-dev) .chat-mod-panel .agent-chat-messages {
+  padding: 16px 18px 12px !important;
+}
+
+
+html.staging-ui.staging-compact-chat .chat-mod-panel::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 0 0 auto;
+  height: 42%;
+  pointer-events: none;
+  border-radius: 20px 20px 0 0 !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.38), transparent) !important;
+}
+
+/* 审核卡片：让审核人下拉不被卡片裁剪 */
+html.staging-ui.staging-compact-chat #viewStrategyAudit .chat-mod-panel {
+  overflow: visible !important;
+}
+
+html.staging-ui.staging-compact-chat #viewStrategyAudit .agent-chat-shell,
+html.staging-ui.staging-compact-chat #viewStrategyAudit:not(.hidden) {
+  overflow: visible !important;
+}
+
+html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-reviewer-dropdown {
+  z-index: 1400 !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(16, 16, 16, 0.12) !important;
+  box-shadow: 0 12px 36px rgba(26, 26, 26, 0.18) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-panel .module-search-bar-top {
+  position: relative;
+  z-index: 50;
+  flex-shrink: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  margin: 14px 16px 0 !important;
+  padding: 0 !important;
+  align-self: stretch !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-panel .agent-chat-messages {
+  position: relative;
+  z-index: 1;
+  flex: 0 1 auto !important;
+  max-height: min(38vh, calc(100dvh - 400px)) !important;
+  padding: 10px 16px 6px !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-panel .agent-chat-composer {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 12px 14px !important;
+  box-sizing: border-box !important;
+}
+
+/* 卡片内不再叠多层玻璃框 */
+html.staging-ui.staging-compact-chat .chat-mod-panel .chat-mod-input-shell,
+html.staging-ui.staging-compact-chat .chat-mod-panel .renewal-input-shell,
+html.staging-ui.staging-compact-chat .chat-mod-panel .chat-mod-input-inner,
+html.staging-ui.staging-compact-chat .chat-mod-panel .renewal-input-inner {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-panel .chat-mod-input-glow,
+html.staging-ui.staging-compact-chat .chat-mod-panel .renewal-input-glow {
+  min-height: 96px !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.38) !important;
+  border: 1px solid rgba(16, 16, 16, 0.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-panel .chat-mod-input-glow::after,
+html.staging-ui.staging-compact-chat .chat-mod-panel .renewal-input-glow::after {
+  display: none !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-panel .chat-mod-input-glow:focus-within,
+html.staging-ui.staging-compact-chat .chat-mod-panel .renewal-input-glow:focus-within {
+  background: rgba(255, 255, 255, 0.52) !important;
+  border-color: rgba(16, 16, 16, 0.14) !important;
+  box-shadow:
+    0 0 0 3px var(--cu-focus),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+  transform: none !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-panel .module-search-bar .audit-reviewer-input-wrap {
+  background: rgba(255, 255, 255, 0.38) !important;
+  border: 1px solid rgba(16, 16, 16, 0.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.staging-ui.staging-compact-chat .chat-mod-panel .module-search-bar .audit-reviewer-input-wrap:focus-within {
+  background: rgba(255, 255, 255, 0.52) !important;
+  border-color: rgba(16, 16, 16, 0.14) !important;
+  box-shadow:
+    0 0 0 3px var(--cu-focus),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+ * v13 · 审核人下拉向上；非首页输入取消放大，仅保留选中态
+ * ═══════════════════════════════════════════════════════ */
+
+/* 审核人搜索：列表向上展开 */
+html.staging-ui .audit-reviewer-dropdown,
+html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-reviewer-dropdown {
+  top: auto !important;
+  bottom: calc(100% + 6px) !important;
+  transform: translateY(4px) !important;
+  max-height: min(320px, 42vh) !important;
+}
+
+html.staging-ui .audit-reviewer-combobox.open .audit-reviewer-dropdown,
+html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-reviewer-combobox.open .audit-reviewer-dropdown {
+  transform: translateY(0) !important;
+}
+
+/* 审核下拉不被底部固定卡片裁切 */
+html.staging-ui.staging-compact-chat #viewStrategyAudit .chat-mod-panel,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .agent-chat-shell {
+  overflow: visible !important;
+}
+
+/* 非首页输入框：彻底取消放大/尺寸动画，只保留选中描边 */
+html.staging-ui .chat-mod-input-shell,
+html.staging-ui .renewal-input-shell {
+  transform: none !important;
+  transform-origin: center center !important;
+  transition: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+html.staging-ui .chat-mod-input-glow,
+html.staging-ui .renewal-input-glow,
+html.staging-ui .chat-mod-input-glow:focus-within,
+html.staging-ui .renewal-input-glow:focus-within,
+html.staging-ui.staging-compact-chat .chat-mod-input-glow:focus-within,
+html.staging-ui.staging-compact-chat .renewal-input-glow:focus-within,
+html.staging-ui.staging-compact-chat .chat-mod-panel .chat-mod-input-glow:focus-within,
+html.staging-ui.staging-compact-chat .chat-mod-panel .renewal-input-glow:focus-within {
+  transform: none !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease !important;
+  animation: none !important;
+}
+
+html.staging-ui .chat-mod-input,
+html.staging-ui .renewal-chat-input,
+html.staging-ui .chat-mod-input:focus,
+html.staging-ui .renewal-chat-input:focus,
+html.staging-ui .chat-mod-input-glow:focus-within .chat-mod-input,
+html.staging-ui .renewal-input-glow:focus-within .renewal-chat-input {
+  transform: none !important;
+  min-height: 72px !important;
+  height: auto !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+
+html.staging-ui .agent-chat-composer.chat-mod-composer,
+html.staging-ui .agent-chat-composer.renewal-composer,
+html.staging-ui .agent-chat-composer.chat-mod-composer:focus-within,
+html.staging-ui .agent-chat-composer.renewal-composer:focus-within,
+html.staging-ui .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
+html.staging-ui .agent-chat-shell .agent-chat-composer.renewal-composer:focus-within {
+  transform: none !important;
+  max-width: none !important;
+  width: 100% !important;
+  padding: 0 12px 14px !important;
+  transition: none !important;
+}
+
+html.staging-ui .chat-mod-send.agent-send-btn,
+html.staging-ui .renewal-send-btn.agent-send-btn,
+html.staging-ui .chat-mod-input-glow:focus-within .chat-mod-send.agent-send-btn,
+html.staging-ui .renewal-input-glow:focus-within .renewal-send-btn.agent-send-btn,
+html.staging-ui .agent-chat-composer:focus-within .chat-mod-send.agent-send-btn,
+html.staging-ui .agent-chat-composer:focus-within .renewal-send-btn.agent-send-btn,
+html.staging-ui .chat-mod-send.agent-send-btn:hover,
+html.staging-ui .renewal-send-btn.agent-send-btn:hover,
+html.staging-ui .chat-mod-send.agent-send-btn:hover:not(:disabled),
+html.staging-ui .renewal-send-btn.agent-send-btn:hover:not(:disabled),
+html.staging-ui .chat-mod-send.agent-send-btn:active,
+html.staging-ui .renewal-send-btn.agent-send-btn:active,
+html.staging-ui .chat-mod-send.agent-send-btn:active:not(:disabled),
+html.staging-ui .renewal-send-btn.agent-send-btn:active:not(:disabled) {
+  transform: none !important;
+}
+
+html.staging-ui .chat-mod-input-glow:focus-within,
+html.staging-ui .renewal-input-glow:focus-within {
+  border-color: rgba(16, 16, 16, 0.22) !important;
+  box-shadow:
+    0 0 0 3px var(--cu-focus, rgba(38, 37, 30, 0.14)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+  filter: none !important;
+}
+
+html.staging-ui .module-search-bar .audit-reviewer-input-wrap:focus-within {
+  border-color: rgba(16, 16, 16, 0.22) !important;
+  box-shadow:
+    0 0 0 3px var(--cu-focus, rgba(38, 37, 30, 0.14)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+  transform: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+ * v8 · 审核人批量操作（查询结果里的批量按钮）
+ * ═══════════════════════════════════════════════════════ */
+
+html.staging-ui .audit-batch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+html.staging-ui .audit-creator-summary {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--cu-text-muted, #5c5c5c);
+}
+
+/* ═══════════════════════════════════════════════════════
+ * v9 · 测试环境布局（:3001 · staging-dev）
+ * 绿区：执行流程（上半段 + 超浅底色 + 滚动条）
+ * 红区：信息+搜索框（下移到中下部）
+ * ═══════════════════════════════════════════════════════ */
+
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyQuery .agent-chat-shell,
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyAudit .agent-chat-shell,
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .agent-chat-shell {
+  justify-content: flex-start !important;
+  align-items: center !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+/* 绿区 · 执行流程：固定 1200×670 + 滑动块 */
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyQuery .module-flow-results,
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyAudit .module-flow-results,
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .module-flow-results {
+  flex: 0 0 auto !important;
+  width: 1200px !important;
+  max-width: calc(100% - 48px) !important;
+  height: 670px !important;
+  max-height: 670px !important;
+  min-height: 670px !important;
+  margin: 3vh auto 0 !important;
+  padding: 14px 16px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+  background: color-mix(in srgb, var(--sg-bg-2) 72%, #ffffff) !important;
+  border: 1px solid rgba(15, 23, 42, 0.04) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: rgba(16, 16, 16, 0.42) rgba(16, 16, 16, 0.08);
+}
+
+/* 无执行内容时不展现执行流程框 */
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyQuery .module-flow-results.is-empty,
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyAudit .module-flow-results.is-empty,
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .module-flow-results.is-empty {
+  display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+html.staging-ui.staging-dev.staging-compact-chat .module-flow-results::-webkit-scrollbar {
+  width: 10px;
+}
+
+html.staging-ui.staging-dev.staging-compact-chat .module-flow-results::-webkit-scrollbar-track {
+  background: rgba(16, 16, 16, 0.08);
+  border-radius: 999px;
+  margin: 8px 0;
+}
+
+html.staging-ui.staging-dev.staging-compact-chat .module-flow-results::-webkit-scrollbar-thumb {
+  background: rgba(16, 16, 16, 0.38);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+html.staging-ui.staging-dev .module-flow-results .agent-msg {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 auto 10px !important;
+}
+
+html.staging-ui.staging-dev .module-flow-results .agent-msg-user {
+  display: none !important;
+}
+
+html.staging-ui.staging-dev .module-flow-results .agent-msg-bubble,
+html.staging-ui.staging-dev .module-flow-results .agent-msg-content {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: #141414 !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+/* 红区 · 信息+搜索框：整体再下移 200px */
+html.staging-ui.staging-dev.staging-compact-chat .chat-mod-panel.module-input-block {
+  margin: calc(12vh + 200px) auto 32px !important;
+  flex-shrink: 0 !important;
+}
+
+/* 无执行时绿区不占位：红区仍按「原绿区高度 + 间距 + 再下移 200px」锚定 */
+html.staging-ui.staging-dev.staging-compact-chat
+  .agent-chat-shell:has(.module-flow-results.is-empty)
+  .chat-mod-panel.module-input-block {
+  margin-top: calc(28vh + 3vh + 12vh + 200px) !important;
+}
+
+html.staging-ui.staging-dev.staging-compact-chat .module-input-block .module-hint-slot {
+  position: relative;
+  z-index: 1;
+  /* 对齐正式环境 .chat-mod-panel .agent-chat-messages 内边距 */
+  padding: 10px 16px 6px !important;
+  margin: 0 !important;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #333333;
+  box-sizing: border-box;
+}
+
+html.staging-ui.staging-dev.staging-compact-chat .module-input-block .module-hint-slot code {
+  font-size: 12px;
+}
+
+/* 输入卡片内部间距完全沿用正式环境 chat-mod-panel 规则 */
+html.staging-ui.staging-dev.staging-compact-chat .module-input-block .module-search-bar-top {
+  margin: 14px 16px 0 !important;
+  padding: 0 !important;
+}
+
+html.staging-ui.staging-dev.staging-compact-chat .module-input-block .agent-chat-composer {
+  padding: 0 12px 14px !important;
+  margin: 0 !important;
+}
+
+/* ─── API 服务状态：输入框左侧独立块，UI 对齐输入卡片（不改业务逻辑）─── */
+html.staging-ui .agent-chat-shell > .module-api-health {
+  position: absolute !important;
+  /* 钉在居中输入卡片左侧空白区，避免与 860 输入框重叠；整体再左移 45px */
+  left: max(16px, calc(50% - min(860px, calc(100% - 32px)) / 2 - 341px)) !important;
+  bottom: 96px !important;
+  top: auto !important;
+  z-index: 28 !important;
+  width: 280px !important;
+  max-width: calc(50% - min(860px, calc(100% - 32px)) / 2 - 32px) !important;
+  min-width: 180px !important;
+  margin: 0 !important;
+  padding: 14px 16px 12px !important;
+  box-sizing: border-box !important;
+  border-radius: 20px !important;
+  background: var(--sg-glass-surface) !important;
+  border: 1px solid var(--sg-glass-edge) !important;
+  box-shadow: var(--sg-glass-shadow) !important;
+  backdrop-filter: var(--sg-glass-blur-strong) !important;
+  -webkit-backdrop-filter: var(--sg-glass-blur-strong) !important;
+  display: none !important;
+}
+
+html.staging-ui .view:not(.hidden) .agent-chat-shell > .module-api-health {
+  display: block !important;
+}
+
+/* 定向屏蔽：API 挂在 Log 面板内，宽度随内容自适应 */
+html.staging-ui #viewStrategyShieldPlatform .shield-plat-panel-wide .shield-plat-api-health-slot {
+  grid-column: auto;
+  margin-top: 10px;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+  flex-shrink: 0;
+  position: static;
+  bottom: auto;
+  z-index: 1;
+  padding: 0;
+  background: transparent;
+}
+
+html.staging-ui #viewStrategyShieldPlatform .shield-plat-api-health-slot > .module-api-health {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 1 !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 8px 10px 6px !important;
+  box-sizing: border-box !important;
+  border-radius: 12px !important;
+  background: var(--sg-glass-surface) !important;
+  border: 1px solid var(--sg-glass-edge) !important;
+  box-shadow: var(--sg-glass-shadow) !important;
+  backdrop-filter: var(--sg-glass-blur-strong) !important;
+  -webkit-backdrop-filter: var(--sg-glass-blur-strong) !important;
+  display: none !important;
+  overflow: visible !important;
+}
+
+html.staging-ui #viewStrategyShieldPlatform:not(.hidden) .shield-plat-api-health-slot > .module-api-health {
+  display: block !important;
+}
+
+html.staging-ui #viewStrategyShieldPlatform .module-api-health-body {
+  display: grid;
+  gap: 4px;
+  width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+html.staging-ui #viewStrategyShieldPlatform .module-api-health-row.is-inline {
+  display: grid;
+  grid-template-columns: 8px minmax(0, max-content) auto;
+  gap: 6px 8px;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(16, 16, 16, 0.06);
+  min-height: 0;
+  width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+html.staging-ui #viewStrategyShieldPlatform .module-api-health-row.is-inline .module-api-health-name {
+  font-size: 11px;
+  font-weight: 650;
+  color: #1a1a1a;
+  white-space: nowrap;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+html.staging-ui #viewStrategyShieldPlatform .module-api-health-path {
+  display: inline-block;
+  min-width: 0;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(16, 16, 16, 0.05);
+  border: 1px solid rgba(16, 16, 16, 0.06);
+  font-size: 10px;
+  line-height: 1.35;
+  color: rgba(55, 55, 55, 0.78);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  white-space: nowrap;
+}
+
+html.staging-ui #viewStrategyShieldPlatform .module-api-health-row.is-inline .module-api-health-state {
+  justify-self: start;
+  flex-shrink: 0;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+html.staging-ui .module-api-health-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+html.staging-ui .module-api-health-title {
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--cu-text, #1a1a1a);
+}
+
+html.staging-ui .module-api-health-refresh {
+  appearance: none;
+  border: 1px solid rgba(26, 26, 26, 0.1);
+  background: rgba(255, 255, 255, 0.55);
+  color: #4b5563;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 5px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+html.staging-ui .module-api-health-refresh:hover {
+  color: #1f2328;
+  border-color: rgba(26, 26, 26, 0.16);
+  background: rgba(255, 255, 255, 0.75);
+}
+
+html.staging-ui .module-api-health-body {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(16, 16, 16, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  box-sizing: border-box;
+}
+
+html.staging-ui .module-api-health-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+}
+
+html.staging-ui .module-api-health-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9ca3af;
+  box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.16);
+}
+
+html.staging-ui .module-api-health-row.is-pending .module-api-health-dot {
+  animation: module-api-pulse 1.1s ease-in-out infinite;
+}
+
+html.staging-ui .module-api-health-row.is-ok .module-api-health-dot {
+  background: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.16);
+  animation: none;
+}
+
+html.staging-ui .module-api-health-row.is-err .module-api-health-dot {
+  background: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.14);
+  animation: none;
+}
+
+html.staging-ui .module-api-health-name {
+  font-size: 13px;
+  font-weight: 650;
+  color: #1f2328;
+  white-space: nowrap;
+}
+
+html.staging-ui .module-api-health-state {
+  font-size: 12px;
+  color: #6b7280;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html.staging-ui .module-api-health-row.is-ok .module-api-health-state {
+  color: #047857;
+}
+
+html.staging-ui .module-api-health-row.is-err .module-api-health-state {
+  color: #b91c1c;
+}
+
+html.staging-ui .module-api-health-foot {
+  margin-top: 8px;
+  padding: 0 2px;
+}
+
+html.staging-ui .module-api-health-updated {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+@keyframes module-api-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.staging-ui .module-api-health-row.is-pending .module-api-health-dot {
+    animation: none;
+  }
+}
+
+@media (max-width: 1180px) {
+  html.staging-ui .agent-chat-shell > .module-api-health {
+    left: max(0px, calc(12px - 45px)) !important;
+    width: min(220px, 20vw) !important;
+    max-width: min(220px, 20vw) !important;
+    min-width: 160px !important;
+  }
+}
+
+@media (max-width: 980px) {
+  html.staging-ui .agent-chat-shell > .module-api-health {
+    left: max(0px, calc(12px - 45px)) !important;
+    bottom: auto !important;
+    top: 12px !important;
+    width: min(260px, calc(100% - 24px)) !important;
+    max-width: min(260px, calc(100% - 24px)) !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+ * 三模块输入框：禁止缩小/放大；选中仅边框变色（不改业务逻辑）
+ * 策略审核 / 策略延期 / 策略查询
+ * ═══════════════════════════════════════════════════════ */
+html.staging-ui #viewStrategyQuery .chat-mod-input-shell,
+html.staging-ui #viewStrategyQuery .chat-mod-input-glow,
+html.staging-ui #viewStrategyQuery .chat-mod-input-inner,
+html.staging-ui #viewStrategyQuery .chat-mod-input,
+html.staging-ui #viewStrategyQuery .chat-mod-send,
+html.staging-ui #viewStrategyQuery .agent-chat-composer,
+html.staging-ui #viewStrategyAudit .chat-mod-input-shell,
+html.staging-ui #viewStrategyAudit .chat-mod-input-glow,
+html.staging-ui #viewStrategyAudit .chat-mod-input-inner,
+html.staging-ui #viewStrategyAudit .chat-mod-input,
+html.staging-ui #viewStrategyAudit .chat-mod-send,
+html.staging-ui #viewStrategyAudit .agent-chat-composer,
+html.staging-ui #viewStrategyRenewal .renewal-input-shell,
+html.staging-ui #viewStrategyRenewal .renewal-input-glow,
+html.staging-ui #viewStrategyRenewal .renewal-input-inner,
+html.staging-ui #viewStrategyRenewal .renewal-chat-input,
+html.staging-ui #viewStrategyRenewal .renewal-send-btn,
+html.staging-ui #viewStrategyRenewal .agent-chat-composer,
+html.staging-ui #viewStrategyQuery .chat-mod-input-glow:focus-within,
+html.staging-ui #viewStrategyAudit .chat-mod-input-glow:focus-within,
+html.staging-ui #viewStrategyRenewal .renewal-input-glow:focus-within,
+html.staging-ui #viewStrategyQuery .agent-chat-composer:focus-within,
+html.staging-ui #viewStrategyAudit .agent-chat-composer:focus-within,
+html.staging-ui #viewStrategyRenewal .agent-chat-composer:focus-within,
+html.staging-ui #viewStrategyQuery .chat-mod-send:hover,
+html.staging-ui #viewStrategyQuery .chat-mod-send:active,
+html.staging-ui #viewStrategyAudit .chat-mod-send:hover,
+html.staging-ui #viewStrategyAudit .chat-mod-send:active,
+html.staging-ui #viewStrategyRenewal .renewal-send-btn:hover,
+html.staging-ui #viewStrategyRenewal .renewal-send-btn:active {
+  transform: none !important;
+  scale: 1 !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+html.staging-ui #viewStrategyQuery .chat-mod-input-shell,
+html.staging-ui #viewStrategyAudit .chat-mod-input-shell,
+html.staging-ui #viewStrategyRenewal .renewal-input-shell,
+html.staging-ui #viewStrategyQuery .chat-mod-input-glow,
+html.staging-ui #viewStrategyAudit .chat-mod-input-glow,
+html.staging-ui #viewStrategyRenewal .renewal-input-glow,
+html.staging-ui #viewStrategyQuery .agent-chat-composer,
+html.staging-ui #viewStrategyAudit .agent-chat-composer,
+html.staging-ui #viewStrategyRenewal .agent-chat-composer {
+  transition: border-color 0.16s ease !important;
+}
+
+/* 选中：只改边框颜色，去掉外扩光晕（否则看起来像放大） */
+html.staging-ui #viewStrategyQuery .chat-mod-input-glow,
+html.staging-ui #viewStrategyAudit .chat-mod-input-glow,
+html.staging-ui #viewStrategyRenewal .renewal-input-glow,
+html.staging-ui.staging-compact-chat #viewStrategyQuery .chat-mod-panel .chat-mod-input-glow,
+html.staging-ui.staging-compact-chat #viewStrategyAudit .chat-mod-panel .chat-mod-input-glow,
+html.staging-ui.staging-compact-chat #viewStrategyRenewal .chat-mod-panel .renewal-input-glow {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65) !important;
+}
+
+html.staging-ui #viewStrategyQuery .chat-mod-input-glow:focus-within,
+html.staging-ui #viewStrategyAudit .chat-mod-input-glow:focus-within,
+html.staging-ui #viewStrategyRenewal .renewal-input-glow:focus-within,
+html.staging-ui.staging-compact-chat #viewStrategyQuery .chat-mod-panel .chat-mod-input-glow:focus-within,
+html.staging-ui.staging-compact-chat #viewStrategyAudit .chat-mod-panel .chat-mod-input-glow:focus-within,
+html.staging-ui.staging-compact-chat #viewStrategyRenewal .chat-mod-panel .renewal-input-glow:focus-within {
+  border-color: rgba(59, 130, 246, 0.55) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+  background: rgba(255, 255, 255, 0.52) !important;
+  outline: none !important;
+}
+
+/* 禁止 focus-within 改 padding / 宽度（看起来像整体放大） */
+html.staging-ui #viewStrategyQuery .agent-chat-composer.chat-mod-composer:focus-within,
+html.staging-ui #viewStrategyAudit .agent-chat-composer.chat-mod-composer:focus-within,
+html.staging-ui #viewStrategyRenewal .agent-chat-composer.renewal-composer:focus-within,
+html.staging-ui #viewStrategyQuery .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
+html.staging-ui #viewStrategyAudit .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
+html.staging-ui #viewStrategyRenewal .agent-chat-shell .agent-chat-composer.renewal-composer:focus-within,
+html.github-ui.staging-ui #viewStrategyQuery .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
+html.github-ui.staging-ui #viewStrategyAudit .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
+html.github-ui.staging-ui #viewStrategyRenewal .agent-chat-shell .agent-chat-composer.renewal-composer:focus-within {
+  max-width: none !important;
+  width: 100% !important;
+  padding: 0 12px 14px !important;
+  margin: 0 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+html.staging-ui #viewStrategyQuery .chat-mod-input:focus,
+html.staging-ui #viewStrategyAudit .chat-mod-input:focus,
+html.staging-ui #viewStrategyRenewal .renewal-chat-input:focus,
+html.staging-ui #viewStrategyQuery .agent-chat-input:focus,
+html.staging-ui #viewStrategyAudit .agent-chat-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  transform: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+ * 非首页：框外输入提示块（框内无 placeholder / 无内嵌提示）
+ * ═══════════════════════════════════════════════════════ */
+html.staging-ui #viewStrategyQuery .chat-mod-input::placeholder,
+html.staging-ui #viewStrategyAudit .chat-mod-input::placeholder,
+html.staging-ui #viewStrategyRenewal .renewal-chat-input::placeholder {
+  color: transparent !important;
+  opacity: 0 !important;
+}
+
+html.staging-ui #viewStrategyQuery .chat-mod-input-inner .module-input-hint,
+html.staging-ui #viewStrategyAudit .chat-mod-input-inner .module-input-hint,
+html.staging-ui #viewStrategyRenewal .renewal-input-inner .module-input-hint {
+  display: none !important;
+}
+
+html.staging-ui .chat-mod-panel > .module-hint-slot,
+html.staging-ui.staging-compact-chat .chat-mod-panel > .module-hint-slot,
+html.staging-ui.staging-compact-chat:not(.staging-dev) .module-input-block .module-hint-slot,
+html.staging-ui.staging-dev.staging-compact-chat .module-input-block .module-hint-slot {
+  position: relative !important;
+  z-index: 2 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  margin: 0 !important;
+  padding: 12px 16px 6px !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+html.staging-ui .module-input-tip,
+html.staging-ui .chat-mod-panel .module-hint-slot .module-hint-line,
+html.staging-ui.staging-compact-chat .module-input-block .module-hint-slot .module-hint-line {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 6px 12px !important;
+  box-sizing: border-box !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(59, 130, 246, 0.16) !important;
+  background: linear-gradient(180deg, #eef4ff 0%, #e6effd 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 4px 14px rgba(37, 99, 235, 0.06) !important;
+  color: rgba(30, 41, 59, 0.92) !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+html.staging-ui .module-input-tip-label {
+  flex: 0 0 auto;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.04em;
+  color: #2563eb !important;
+  padding: 2px 8px !important;
+  border-radius: 999px !important;
+  background: rgba(37, 99, 235, 0.1) !important;
+  border: 1px solid rgba(37, 99, 235, 0.14) !important;
+}
+
+html.staging-ui .module-input-tip-text {
+  min-width: 0;
+}
+
+html.staging-ui .chat-mod-panel .module-hint-slot .module-hint-line code {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid rgba(59, 130, 246, 0.14) !important;
+  border-radius: 6px !important;
+  padding: 1px 6px !important;
+  font-size: 11px !important;
+  color: #1e3a8a !important;
+}
+
+/* 旧玻璃厚卡片样式已移除，统一走下方 A 版扁平规则 */
+
+/* ── 首页日志 A 版：扁平（覆盖玻璃厚卡片） ── */
+html.staging-ui .gh-home-shell {
+  background: #f6f7f9 !important;
+  gap: 0 !important;
+}
+
+html.staging-ui .gh-home-shell::before,
+html.staging-ui .gh-home-shell::after {
+  opacity: 0 !important;
+}
+
+html.staging-ui .gh-home-stage {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 2.1fr) !important;
+  gap: 12px !important;
+}
+
+html.staging-ui .gh-home-left {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+html.staging-ui .gh-home-errors {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid #fecaca !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  flex: 1 1 0 !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+html.staging-ui .gh-home-api-status {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(229, 231, 235, 0.95) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  overflow: visible !important;
+}
+
+html.staging-ui .gh-home-logs {
+  width: auto !important;
+  flex: unset !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+@media (max-width: 900px) {
+  html.staging-ui .gh-home-stage {
+    width: 100% !important;
+    margin: 0 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+  }
+
+  html.staging-ui .gh-home-left,
+  html.staging-ui .gh-home-errors,
+  html.staging-ui .gh-home-api-status,
+  html.staging-ui .gh-home-logs {
+    width: 100% !important;
+  }
+
+  html.staging-ui .gh-home-errors {
+    max-height: 220px !important;
+  }
+}
+
+html.staging-ui .gh-home-log-panel {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(229, 231, 235, 0.95) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.staging-ui .gh-home-log-head {
+  background: transparent !important;
+  border-bottom: 0 !important;
+}
+
+html.staging-ui .gh-home-log-title {
+  color: #1f2937 !important;
+}
+
+html.staging-ui .gh-home-log-hint {
+  margin: 0 !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+  color: #9ca3af !important;
+}
+
+html.staging-ui .gh-home-log-search {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1.5px solid #e5e7eb !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: #6b7280 !important;
+}
+
+html.staging-ui .gh-home-log-search:focus-within {
+  border-bottom-color: #6366f1 !important;
+  box-shadow: none !important;
+}
+
+html.staging-ui .gh-home-log-search-icon {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+html.staging-ui .gh-home-log-search-input {
+  color: #111827 !important;
+}
+
+html.staging-ui .gh-home-log-pill {
+  background: #f3f4f6 !important;
+  border: 0 !important;
+  color: #6b7280 !important;
+}
+
+html.staging-ui .gh-home-log-pill.is-busy {
+  color: #92400e !important;
+  background: #fef3c7 !important;
+  border: 0 !important;
+}
+
+html.staging-ui .gh-home-log-refresh {
+  background: transparent !important;
+  border: 0 !important;
+  color: #6b7280 !important;
+}
+
+html.staging-ui .gh-home-log-refresh:hover {
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+html.staging-ui .gh-home-log-body {
+  color: #4b5563 !important;
+}
+
+html.staging-ui .gh-home-query-item {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+html.staging-ui .gh-home-query-item:hover,
+html.staging-ui .gh-home-query-item:focus {
+  background: #f3f4f6 !important;
+  border: 0 !important;
+}
+
+html.staging-ui .gh-home-composer-wrap {
+  filter: none !important;
+  width: 100% !important;
+}
+
+html.staging-ui .gh-home-composer-wrap:has(.gh-home-composer:focus-within),
+html.staging-ui .gh-home-composer-wrap:has(.gh-home-composer-expanded) {
+  filter: none !important;
+  transform: none !important;
+  width: 100% !important;
+}
+
+html.staging-ui .gh-home-composer,
+html.staging-ui .gh-home-composer:focus-within,
+html.staging-ui .gh-home-composer.gh-home-composer-expanded {
+  background: #fff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  height: 118px !important;
+}
+
+html.staging-ui .gh-home-composer:focus-within,
+html.staging-ui .gh-home-composer.gh-home-composer-expanded {
+  height: 142px !important;
+  border-color: #c7d2fe !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08) !important;
+}
+
+html.staging-ui.staging-compact-chat #viewHome:not(.hidden) {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+html.staging-ui.staging-compact-chat .gh-home-shell {
+  overflow: hidden !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+ * GLASS-BOOST-LR v2 · 左右侧纯毛玻璃（无彩色渐变）
+ * 回滚：删本块 / 或还原 .rollback-staging-glass-before-glass-boost-*.css
+ * ═══════════════════════════════════════════════════════ */
+
+html.staging-ui {
+  --glass-boost-blur: blur(44px) saturate(180%);
+  --glass-boost-edge: rgba(255, 255, 255, 0.78);
+  --glass-boost-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 10px 36px rgba(26, 26, 26, 0.06);
+}
+
+/* 关掉彩色光斑，底色保持中性 */
+html.staging-ui body::before,
+html.staging-ui body::after {
+  opacity: 0 !important;
+  background: none !important;
+  filter: none !important;
+}
+
+html.staging-ui,
+html.staging-ui body {
+  background: #f3f3f1 !important;
+}
+
+/* 左侧导航 · 纯白半透明毛玻璃 */
+html.staging-ui .sidebar {
+  position: relative !important;
+  background: rgba(255, 255, 255, 0.42) !important;
+  border: 1px solid var(--glass-boost-edge) !important;
+  box-shadow: var(--glass-boost-shadow) !important;
+  backdrop-filter: var(--glass-boost-blur) !important;
+  -webkit-backdrop-filter: var(--glass-boost-blur) !important;
+}
+
+html.staging-ui .sidebar::before,
+html.staging-ui .sidebar::after {
+  display: none !important;
+}
+
+html.staging-ui .nav-group {
+  background: rgba(255, 255, 255, 0.28) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* 右侧主窗 · 同款纯毛玻璃 */
+html.staging-ui .main {
+  position: relative !important;
+  background: rgba(255, 255, 255, 0.32) !important;
+  border: 1px solid var(--glass-boost-edge) !important;
+  box-shadow: var(--glass-boost-shadow) !important;
+  backdrop-filter: var(--glass-boost-blur) !important;
+  -webkit-backdrop-filter: var(--glass-boost-blur) !important;
+}
+
+html.staging-ui .main::before {
+  display: none !important;
+}
+
+html.staging-ui .topbar {
+  background: rgba(255, 255, 255, 0.45) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(28px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
+}
+
+/* 执行流程空态强制隐藏（兜底，压过其它规则） */
+html.staging-ui .module-flow-results.is-empty,
+html.staging-ui .module-flow-results[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 执行流程固定尺寸兜底：1200×670 + 可见滑动块 */
+html.staging-ui.staging-compact-chat .module-flow-results:not(.is-empty):not([hidden]) {
+  width: 1200px !important;
+  max-width: calc(100% - 32px) !important;
+  height: 670px !important;
+  max-height: 670px !important;
+  min-height: 670px !important;
+  overflow-y: auto !important;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: rgba(16, 16, 16, 0.42) rgba(16, 16, 16, 0.08);
+}
+
+html.staging-ui.staging-compact-chat .module-flow-results:not(.is-empty):not([hidden])::-webkit-scrollbar {
+  width: 10px;
+}
+
+html.staging-ui.staging-compact-chat .module-flow-results:not(.is-empty):not([hidden])::-webkit-scrollbar-track {
+  background: rgba(16, 16, 16, 0.08);
+  border-radius: 999px;
+  margin: 8px 0;
+}
+
+html.staging-ui.staging-compact-chat .module-flow-results:not(.is-empty):not([hidden])::-webkit-scrollbar-thumb {
+  background: rgba(16, 16, 16, 0.38);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+
+/* 侧栏「策略模块」长文案换行 */
+html.staging-ui .nav-item,
+.github-ui .nav-item {
+  white-space: normal !important;
+  line-height: 1.25 !important;
+  align-items: flex-start !important;
+}
+
+html.staging-ui .nav-item .nav-icon,
+.github-ui .nav-item .nav-icon {
+  margin-top: 2px !important;
+}
+
+/* ─── 定向屏蔽：路由 / 工单 / 任务 + 右侧策略目录 ─── */
+html.staging-ui #viewStrategyShieldPlatform:not(.hidden) {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: auto !important;
+  padding: 16px 16px 28px !important;
+}
+
+html.staging-ui .shield-plat-shell {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html.staging-ui .shield-plat-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+html.staging-ui .shield-plat-catalog.panel,
+html.staging-ui aside.panel.shield-plat-catalog {
+  flex: 0 0 380px;
+  width: 380px;
+  max-width: 380px;
+  position: sticky;
+  top: 8px;
+  max-height: calc(100vh - 88px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: none !important;
+  padding: 12px 12px 10px !important;
+}
+
+html.staging-ui .shield-plat-catalog.panel:hover {
+  transform: none !important;
+}
+
+html.staging-ui .shield-plat-operator-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: end;
+  margin: 0 0 8px;
+}
+
+html.staging-ui .shield-plat-operator-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 650;
+  color: rgba(55, 55, 55, 0.78);
+}
+
+html.staging-ui .shield-plat-operator-row input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(16, 16, 16, 0.12);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  background: #fff;
+}
+
+html.staging-ui .shield-plat-catalog-search {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(16, 16, 16, 0.12);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 12px;
+  margin: 0 0 8px;
+  background: #fff;
+}
+
+html.staging-ui .shield-plat-catalog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+html.staging-ui .shield-plat-cat-result {
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: rgba(60, 60, 60, 0.65);
+}
+
+html.staging-ui .shield-plat-cat-group {
+  margin: 0 0 10px;
+}
+
+html.staging-ui .shield-plat-cat-group-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 4px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 4px 0;
+  backdrop-filter: blur(6px);
+}
+
+html.staging-ui .shield-plat-cat-group-head strong {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.35;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.staging-ui .shield-plat-cat-count {
+  font-size: 10px;
+  font-weight: 650;
+  color: rgba(60, 60, 60, 0.65);
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(16, 16, 16, 0.05);
+}
+
+html.staging-ui .shield-plat-cat-row {
+  display: grid;
+  grid-template-columns: 16px 56px minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  height: 32px;
+  padding: 0 6px;
+  margin: 0 0 3px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  border-top: 1px solid transparent;
+  box-sizing: border-box;
+  cursor: pointer;
+  overflow: hidden;
+  background: transparent;
+  transition: background 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease,
+    opacity 0.14s ease;
+}
+
+html.staging-ui .shield-plat-cat-row:hover {
+  background: rgba(16, 16, 16, 0.035);
+  border-color: rgba(16, 16, 16, 0.08);
+}
+
+html.staging-ui .shield-plat-cat-row.is-hit {
+  background: rgba(37, 99, 235, 0.06);
+  border-color: rgba(37, 99, 235, 0.22);
+}
+
+html.staging-ui .shield-plat-cat-row.is-hit.is-selected,
+html.staging-ui .shield-plat-cat-row.is-selected {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.45);
+  border-top-color: rgba(37, 99, 235, 0.55);
+  box-shadow: inset 0 2px 0 0 #2563eb, 0 0 0 1px rgba(37, 99, 235, 0.12);
+}
+
+html.staging-ui .shield-plat-cat-row.is-dim-miss {
+  opacity: 0.42;
+}
+
+html.staging-ui .shield-plat-cat-check-input {
+  margin: 0;
+  width: 14px;
+  height: 14px;
+  accent-color: #2563eb;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+html.staging-ui .shield-plat-cat-id,
+html.staging-ui .shield-plat-cat-name {
+  box-sizing: border-box;
+  border: 1px dashed rgba(37, 99, 235, 0.35);
+  border-radius: 5px;
+  padding: 2px 6px 2px 6px;
+  padding-right: 18px;
+  font-size: 11px;
+  line-height: 1.2;
+  height: 22px;
+  background-color: rgba(37, 99, 235, 0.04);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  background-size: 10px 10px;
+  color: #141414;
+  width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  transition: border-color 0.14s ease, background-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+html.staging-ui .shield-plat-cat-id:hover,
+html.staging-ui .shield-plat-cat-name:hover {
+  border-style: solid;
+  border-color: rgba(37, 99, 235, 0.55);
+  background-color: #fff;
+}
+
+html.staging-ui .shield-plat-cat-id:focus,
+html.staging-ui .shield-plat-cat-name:focus {
+  outline: none;
+  border-style: solid;
+  border-color: #2563eb;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+}
+
+html.staging-ui .shield-plat-cat-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 650;
+  text-align: left;
+}
+
+html.staging-ui .shield-plat-cat-id-ro {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: #141414;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 4px;
+}
+
+html.staging-ui .shield-plat-cat-name-ro {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  padding: 2px 4px;
+}
+
+html.staging-ui .shield-plat-cat-dim {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: rgba(30, 58, 138, 0.9);
+  background: rgba(37, 99, 235, 0.1);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+html.staging-ui .shield-plat-cat-badge {
+  display: none;
+}
+
+html.staging-ui .shield-plat-append-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 0 0 12px;
+}
+
+html.staging-ui .shield-plat-append-col {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(16, 16, 16, 0.08);
+  border-radius: 10px;
+  background: rgba(248, 250, 252, 0.9);
+}
+
+html.staging-ui .shield-plat-append-title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #141414;
+}
+
+html.staging-ui .shield-plat-append-sub {
+  margin: -4px 0 10px;
+}
+
+html.staging-ui .shield-plat-dim-radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+html.staging-ui .shield-plat-dim-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(16, 16, 16, 0.12);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 650;
+  color: #222;
+  cursor: pointer;
+  user-select: none;
+}
+
+html.staging-ui .shield-plat-dim-radio:has(input:checked) {
+  border-color: rgba(37, 99, 235, 0.45);
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+}
+
+html.staging-ui .shield-plat-dim-radio input {
+  margin: 0;
+  accent-color: #2563eb;
+}
+
+html.staging-ui .shield-plat-append-ids {
+  min-height: 120px;
+  margin: 0;
+}
+
+html.staging-ui .shield-plat-suggest-field {
+  position: relative;
+}
+
+html.staging-ui .shield-plat-suggest-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 34px;
+  border: 1px solid rgba(16, 16, 16, 0.12);
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 12px;
+  background: #fff;
+  color: #141414;
+}
+
+html.staging-ui .shield-plat-suggest-input:focus {
+  outline: none;
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+html.staging-ui .shield-plat-suggest-list {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid rgba(16, 16, 16, 0.1);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(16, 16, 16, 0.12);
+}
+
+html.staging-ui .shield-plat-suggest-list[hidden] {
+  display: none !important;
+}
+
+html.staging-ui .shield-plat-suggest-item {
+  display: grid;
+  grid-template-columns: 14px auto minmax(0, 1fr) auto;
+  gap: 6px 8px;
+  align-items: center;
+  width: 100%;
+  height: 32px;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid rgba(16, 16, 16, 0.05);
+  background: transparent;
+  padding: 0 10px;
+  font-size: 12px;
+  color: #222;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+html.staging-ui .shield-plat-suggest-item.is-industry {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+html.staging-ui .shield-plat-suggest-item.is-picked {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+html.staging-ui .shield-plat-suggest-item:last-child {
+  border-bottom: 0;
+}
+
+html.staging-ui .shield-plat-suggest-item:hover,
+html.staging-ui .shield-plat-suggest-item:focus {
+  background: rgba(37, 99, 235, 0.1);
+  outline: none;
+}
+
+html.staging-ui .shield-plat-suggest-item code {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+html.staging-ui .shield-plat-suggest-check {
+  width: 14px;
+  color: #1d4ed8;
+  font-weight: 700;
+  text-align: center;
+}
+
+html.staging-ui .shield-plat-suggest-name {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html.staging-ui .shield-plat-suggest-empty {
+  padding: 10px;
+  font-size: 12px;
+  color: rgba(60, 60, 60, 0.7);
+}
+
+html.staging-ui .shield-plat-append-target {
+  margin-top: 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px dashed rgba(16, 16, 16, 0.14);
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  color: rgba(60, 60, 60, 0.72);
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 8px;
+  min-height: 40px;
+  overflow: hidden;
+}
+
+html.staging-ui .shield-plat-append-target.is-ready {
+  border-style: solid;
+  border-color: rgba(37, 99, 235, 0.28);
+  background: rgba(37, 99, 235, 0.06);
+  color: #141414;
+}
+
+html.staging-ui .shield-plat-append-dim-tag {
+  align-self: flex-start;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1d4ed8;
+  background: rgba(37, 99, 235, 0.12);
+  white-space: nowrap;
+}
+
+html.staging-ui .shield-plat-append-chips {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
+  max-height: 160px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: 0;
+}
+
+html.staging-ui .shield-plat-append-chip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  height: 28px;
+  padding: 0 4px 0 10px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: none;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+html.staging-ui .shield-plat-append-chip code {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+html.staging-ui .shield-plat-append-chip-name {
+  font-size: 11px;
+  color: #333;
+  max-width: none;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.staging-ui .shield-plat-append-chip-x {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(60, 60, 60, 0.7);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+html.staging-ui .shield-plat-append-chip-x:hover {
+  background: rgba(16, 16, 16, 0.08);
+  color: #111;
+}
+
+@media (max-width: 900px) {
+  html.staging-ui .shield-plat-append-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+html.staging-ui .shield-plat-hero {
+  margin-bottom: 14px;
+}
+
+html.staging-ui .shield-plat-hero h1 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #141414;
+  letter-spacing: -0.02em;
+}
+
+html.staging-ui .shield-plat-hero p {
+  margin: 0;
+  max-width: 52em;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(60, 60, 60, 0.78);
+}
+
+html.staging-ui .shield-plat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+html.staging-ui .shield-plat-panel-wide {
+  grid-column: 1 / -1;
+}
+
+html.staging-ui .shield-plat-panel.panel,
+html.staging-ui section.panel.shield-plat-panel {
+  overflow: visible !important;
+  transform: none !important;
+  padding: 14px 16px 16px !important;
+  height: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+}
+
+html.staging-ui .shield-plat-panel.panel:hover,
+html.staging-ui section.panel.shield-plat-panel:hover {
+  transform: none !important;
+}
+
+html.staging-ui .shield-plat-panel .panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+html.staging-ui .shield-plat-panel .panel-header h2,
+html.staging-ui .shield-plat-catalog .panel-header h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+html.staging-ui .shield-plat-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+html.staging-ui .shield-plat-file-btn {
+  cursor: pointer;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html.staging-ui .shield-plat-hint,
+html.staging-ui .shield-plat-muted,
+html.staging-ui .shield-plat-summary {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: rgba(60, 60, 60, 0.72);
+}
+
+html.staging-ui .shield-plat-summary:empty {
+  display: none;
+}
+
+html.staging-ui .shield-plat-route-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  margin-bottom: 14px;
+  align-items: end;
+}
+
+html.staging-ui .shield-plat-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+html.staging-ui .shield-plat-field > span {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: rgba(55, 55, 55, 0.78);
+}
+
+html.staging-ui .shield-plat-field-action {
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+}
+
+html.staging-ui .shield-plat-field-action > span {
+  display: none;
+}
+
+html.staging-ui .shield-plat-field-action .btn-sm {
+  height: 34px;
+  min-width: 96px;
+  padding: 0 16px !important;
+  box-sizing: border-box;
+}
+
+html.staging-ui .shield-plat-field-dim {
+  max-width: none;
+}
+
+html.staging-ui .shield-plat-route-form input,
+html.staging-ui .shield-plat-route-form select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(16, 16, 16, 0.12);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.3;
+  background: rgba(255, 255, 255, 0.92);
+  color: #141414;
+  min-height: 34px;
+}
+
+html.staging-ui .shield-plat-route-form select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+html.staging-ui .shield-plat-route-form input:focus,
+html.staging-ui .shield-plat-route-form select:focus,
+html.staging-ui .shield-plat-ticket:focus {
+  outline: none;
+  border-color: rgba(16, 16, 16, 0.28);
+  box-shadow: 0 0 0 3px rgba(16, 16, 16, 0.06);
+}
+
+html.staging-ui .shield-plat-ticket {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(16, 16, 16, 0.12);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  background: rgba(255, 255, 255, 0.92);
+  color: #141414;
+  min-height: 180px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  flex: 1 1 auto;
+}
+
+html.staging-ui .shield-plat-table-wrap {
+  overflow: auto;
+  max-height: 260px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 16, 16, 0.08);
+  background: rgba(255, 255, 255, 0.45);
+  flex: 1 1 auto;
+}
+
+html.staging-ui .shield-plat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+html.staging-ui .shield-plat-table th,
+html.staging-ui .shield-plat-table td {
+  padding: 9px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(16, 16, 16, 0.06);
+  vertical-align: middle;
+}
+
+html.staging-ui .shield-plat-table th {
+  font-weight: 650;
+  background: rgba(16, 16, 16, 0.035);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+html.staging-ui .shield-plat-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+html.staging-ui .shield-plat-empty-row td {
+  color: rgba(60, 60, 60, 0.55);
+  text-align: center;
+  padding: 28px 12px !important;
+}
+
+html.staging-ui .shield-plat-actions {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+html.staging-ui .shield-plat-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(16, 16, 16, 0.06);
+  color: #333;
+}
+
+html.staging-ui .shield-plat-tag.is-on {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+}
+
+html.staging-ui .shield-plat-tag.is-off {
+  background: rgba(120, 120, 120, 0.12);
+  color: #666;
+}
+
+html.staging-ui .shield-plat-task-list {
+  display: grid;
+  gap: 12px;
+  min-height: 56px;
+}
+
+html.staging-ui .shield-plat-task {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(16, 16, 16, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+html.staging-ui .shield-plat-task header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+html.staging-ui .shield-plat-task p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+html.staging-ui .shield-plat-ids code,
+html.staging-ui .shield-plat-table code {
+  font-size: 12px;
+  word-break: break-all;
+}
+
+html.staging-ui .shield-plat-task-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+html.staging-ui .shield-plat-task-preview {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(16, 16, 16, 0.03);
+  font-size: 13px;
+}
+
+html.staging-ui .shield-plat-task-preview .is-err,
+html.staging-ui .shield-plat-unresolved-item .is-err,
+html.staging-ui .is-err {
+  color: #b42318;
+}
+
+html.staging-ui .shield-plat-task-preview .is-ok,
+html.staging-ui .is-ok {
+  color: #15803d;
+}
+
+html.staging-ui .shield-plat-unresolved {
+  margin-top: 4px;
+}
+
+html.staging-ui .shield-plat-unresolved:empty {
+  display: none;
+}
+
+html.staging-ui .shield-plat-unresolved h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 650;
+  color: rgba(55, 55, 55, 0.88);
+}
+
+html.staging-ui .shield-plat-unresolved-item {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 0.9fr) minmax(0, 1.4fr);
+  gap: 8px;
+  align-items: start;
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(16, 16, 16, 0.05);
+}
+
+html.staging-ui .shield-plat-unresolved-item:last-child {
+  border-bottom: none;
+}
+
+html.staging-ui .shield-plat-log-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+html.staging-ui .shield-plat-log-block {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border: 1px solid rgba(16, 16, 16, 0.08);
+  border-radius: 10px;
+  background: rgba(248, 250, 252, 0.9);
+}
+
+html.staging-ui .shield-plat-log-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+html.staging-ui .shield-plat-log-block-head h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #141414;
+}
+
+html.staging-ui .shield-plat-log-block > .shield-plat-hint {
+  margin: 0 0 6px;
+}
+
+html.staging-ui .shield-plat-log-block .shield-plat-task-list {
+  flex: 1 1 auto;
+  min-height: 64px;
+  max-height: 180px;
+  overflow: auto;
+}
+
+html.staging-ui .shield-plat-exec-entry-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  margin-top: auto;
+  padding: 14px 12px;
+  border: 1px dashed rgba(37, 99, 235, 0.35);
+  border-radius: 10px;
+  background: rgba(37, 99, 235, 0.04);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+html.staging-ui .shield-plat-exec-entry-btn:hover {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.55);
+}
+
+html.staging-ui .shield-plat-exec-entry-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+html.staging-ui .shield-plat-exec-entry-sub {
+  font-size: 11px;
+  color: rgba(60, 60, 60, 0.7);
+}
+
+html.staging-ui .shield-plat-panel-wide.shield-plat-panel,
+html.staging-ui section.panel.shield-plat-panel.shield-plat-panel-wide {
+  height: auto !important;
+  flex: 0 0 auto !important;
+}
+
+html.staging-ui .shield-plat-exec-modal-panel {
+  width: min(820px, calc(100vw - 32px));
+  max-height: min(82vh, 760px);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px 14px;
+  box-sizing: border-box;
+}
+
+html.staging-ui .shield-plat-exec-modal-panel .audit-whitelist-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+html.staging-ui .shield-plat-exec-modal-panel .audit-whitelist-modal-header h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+html.staging-ui .shield-plat-exec-modal-panel .audit-whitelist-modal-sub {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(60, 60, 60, 0.7);
+}
+
+html.staging-ui .shield-plat-exec-modal-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+html.staging-ui .shield-plat-exec-search {
+  flex: 1 1 220px;
+  min-width: 0;
+  height: 34px;
+  box-sizing: border-box;
+  border: 1px solid rgba(16, 16, 16, 0.12);
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 12px;
+  background: #fff;
+}
+
+html.staging-ui .shield-plat-exec-filters {
+  display: inline-flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+html.staging-ui .shield-plat-exec-filter {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(16, 16, 16, 0.1);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 650;
+  color: #444;
+  cursor: pointer;
+}
+
+html.staging-ui .shield-plat-exec-filter.is-active {
+  border-color: rgba(37, 99, 235, 0.4);
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+}
+
+html.staging-ui .shield-plat-exec-log {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+  flex: 1 1 auto;
+  min-height: 120px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+html.staging-ui .shield-plat-log-card {
+  border-radius: 10px;
+  border: 1px solid rgba(16, 16, 16, 0.06);
+  background: rgba(16, 16, 16, 0.03);
+  padding: 10px 12px;
+}
+
+html.staging-ui .shield-plat-log-card.is-ok {
+  background: rgba(22, 163, 74, 0.06);
+  border-color: rgba(22, 163, 74, 0.14);
+}
+
+html.staging-ui .shield-plat-log-card.is-err {
+  background: rgba(180, 35, 24, 0.06);
+  border-color: rgba(180, 35, 24, 0.14);
+}
+
+html.staging-ui .shield-plat-log-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-bottom: 8px;
+}
+
+html.staging-ui .shield-plat-log-card-body {
+  display: grid;
+  gap: 6px;
+}
+
+html.staging-ui .shield-plat-log-card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 8px;
+  font-size: 13px;
+  color: #141414;
+}
+
+html.staging-ui .shield-plat-log-card-title code {
+  font-weight: 700;
+}
+
+html.staging-ui .shield-plat-log-card-ids {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  font-size: 12px;
+}
+
+html.staging-ui .shield-plat-log-card-ids > span {
+  color: rgba(60, 60, 60, 0.65);
+  white-space: nowrap;
+}
+
+html.staging-ui .shield-plat-log-card-ids code {
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+html.staging-ui .shield-plat-log-time {
+  color: rgba(60, 60, 60, 0.65);
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+html.staging-ui .shield-plat-log-op {
+  font-size: 11px;
+  color: rgba(60, 60, 60, 0.7);
+  white-space: nowrap;
+}
+
+html.staging-ui .shield-plat-log-badge {
+  font-size: 11px;
+  font-weight: 650;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(16, 16, 16, 0.06);
+  color: #444;
+  white-space: nowrap;
+}
+
+html.staging-ui .shield-plat-log-card.is-ok .shield-plat-log-badge {
+  background: rgba(22, 163, 74, 0.14);
+  color: #15803d;
+}
+
+html.staging-ui .shield-plat-log-card.is-err .shield-plat-log-badge {
+  background: rgba(180, 35, 24, 0.12);
+  color: #b42318;
+}
+
+html.staging-ui .shield-plat-log-msg {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(60, 60, 60, 0.75);
+  line-height: 1.4;
+}
+
+@media (max-width: 900px) {
+  html.staging-ui .shield-plat-log-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1200px) {
+  html.staging-ui .shield-plat-shell {
+    flex-direction: column;
+  }
+
+  html.staging-ui .shield-plat-catalog.panel,
+  html.staging-ui aside.panel.shield-plat-catalog {
+    flex: none;
+    width: 100%;
+    max-width: none;
+    position: static;
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 960px) {
+  html.staging-ui #viewStrategyShieldPlatform:not(.hidden) {
+    padding: 12px !important;
+  }
+
+  html.staging-ui .shield-plat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  html.staging-ui .shield-plat-unresolved-item {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+ * 移动端适配（staging-ui · ≤768）
+ * - 侧栏改为抽屉，不占主区宽度
+ * - 执行流程/输入卡片/提示条按视口缩放
+ * - 不改业务逻辑；桌面布局保持不变
+ * ═══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  html.staging-ui {
+    --sg-page-gap: 0px;
+  }
+
+  html.staging-ui,
+  html.staging-ui body {
+    overflow: hidden !important;
+  }
+
+  html.staging-ui .app-shell {
+    gap: 0 !important;
+    padding: 0 !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  /* 抽屉侧栏：默认收起 */
+  html.staging-ui .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    z-index: 220 !important;
+    width: min(86vw, 300px) !important;
+    min-width: 0 !important;
+    max-width: 300px !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 18px 18px 0 !important;
+    transform: translateX(-105%) !important;
+    transition: transform 0.24s ease !important;
+  }
+
+  html.staging-ui .app-shell.sidebar-open .sidebar {
+    transform: translateX(0) !important;
+  }
+
+  html.staging-ui .sidebar-backdrop {
+    display: block !important;
+    z-index: 210 !important;
+  }
+
+  html.staging-ui .sidebar-toggle {
+    display: inline-flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 4px !important;
+    width: 36px !important;
+    height: 36px !important;
+    margin-right: 6px !important;
+    border: 1px solid rgba(16, 16, 16, 0.12) !important;
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+  }
+
+  html.staging-ui .sidebar-toggle-bar {
+    display: block !important;
+    width: 15px !important;
+    height: 2px !important;
+    border-radius: 2px !important;
+    background: #334155 !important;
+  }
+
+  html.staging-ui .main {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  html.staging-ui .topbar {
+    height: 52px !important;
+    min-height: 52px !important;
+    padding: 0 10px 0 8px !important;
+  }
+
+  html.staging-ui .content {
+    padding: 10px !important;
+  }
+
+  html.staging-ui.staging-compact-chat .content.content-home,
+  html.staging-ui.staging-compact-chat .content.content-strategy-query {
+    padding: 0 !important;
+  }
+
+  /* 三模块壳：纵向排布，避免绝对定位互相遮挡 */
+  html.staging-ui.staging-compact-chat #viewStrategyQuery .agent-chat-shell,
+  html.staging-ui.staging-compact-chat #viewStrategyAudit .agent-chat-shell,
+  html.staging-ui.staging-compact-chat #viewStrategyRenewal .agent-chat-shell {
+    overflow: hidden !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyQuery .chat-mod-panel,
+  html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .chat-mod-panel,
+  html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .chat-mod-panel,
+  html.staging-ui.staging-compact-chat .chat-mod-panel.module-input-block {
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
+    top: auto !important;
+    transform: translateX(-50%) !important;
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    margin: 0 !important;
+    z-index: 30 !important;
+  }
+
+  /* 执行流程：取消桌面 1200×670；底部预留下方输入卡，避免叠压 */
+  html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyQuery .module-flow-results,
+  html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .module-flow-results,
+  html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .module-flow-results,
+  html.staging-ui.staging-compact-chat .module-flow-results:not(.is-empty):not([hidden]),
+  html.staging-ui.staging-dev.staging-compact-chat #viewStrategyQuery .module-flow-results,
+  html.staging-ui.staging-dev.staging-compact-chat #viewStrategyAudit .module-flow-results,
+  html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .module-flow-results {
+    position: absolute !important;
+    left: 50% !important;
+    top: 8px !important;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px) + 300px) !important;
+    transform: translateX(-50%) !important;
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    height: auto !important;
+    min-height: 96px !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    z-index: 10 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  /* 窄屏隐藏侧挂 API 状态，避免压住输入区 */
+  html.staging-ui .agent-chat-shell > .module-api-health,
+  html.staging-ui .view:not(.hidden) .agent-chat-shell > .module-api-health,
+  html.staging-ui .view .agent-chat-shell > .module-api-health {
+    display: none !important;
+  }
+
+  /* 输入提示允许换行，避免横溢 */
+  html.staging-ui .module-input-tip,
+  html.staging-ui .chat-mod-panel .module-hint-slot .module-hint-line {
+    width: 100% !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    align-items: flex-start !important;
+  }
+
+  html.staging-ui .module-hint-slot {
+    padding: 10px 12px 4px !important;
+  }
+
+  html.staging-ui .module-search-bar-top,
+  html.staging-ui #auditModuleSearchBar {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html.staging-ui .agent-chat-composer,
+  html.staging-ui .agent-chat-composer.chat-mod-composer,
+  html.staging-ui .agent-chat-composer.renewal-composer {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* 避免 iOS 聚焦时自动放大页面（压过 github-ui 的 14px !important） */
+  html.staging-ui.github-ui textarea,
+  html.staging-ui.github-ui input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  html.staging-ui.github-ui select,
+  html.staging-ui.github-ui .agent-chat-input,
+  html.staging-ui.github-ui .chat-mod-input,
+  html.staging-ui.github-ui .renewal-chat-input {
+    font-size: 16px !important;
+  }
+
+  html.staging-ui .topbar-title,
+  html.staging-ui .topbar h1,
+  html.staging-ui .topbar .page-title {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: calc(100vw - 120px) !important;
+  }
+
+  /* 定向屏蔽：强制单列 + 禁止 max-content 撑破视口 */
+  html.staging-ui #viewStrategyShieldPlatform:not(.hidden) {
+    padding: 10px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html.staging-ui .shield-plat-shell,
+  html.staging-ui .shield-plat-main,
+  html.staging-ui .shield-plat-grid,
+  html.staging-ui .shield-plat-panel.panel,
+  html.staging-ui section.panel.shield-plat-panel,
+  html.staging-ui .shield-plat-catalog.panel,
+  html.staging-ui aside.panel.shield-plat-catalog {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html.staging-ui .shield-plat-shell {
+    flex-direction: column !important;
+  }
+
+  html.staging-ui .shield-plat-grid,
+  html.staging-ui .shield-plat-route-form,
+  html.staging-ui .shield-plat-operator-row,
+  html.staging-ui .shield-plat-unresolved-item,
+  html.staging-ui .shield-plat-log-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  html.staging-ui #viewStrategyShieldPlatform .shield-plat-panel-wide .shield-plat-api-health-slot,
+  html.staging-ui #viewStrategyShieldPlatform .shield-plat-api-health-slot > .module-api-health,
+  html.staging-ui #viewStrategyShieldPlatform .module-api-health-body,
+  html.staging-ui #viewStrategyShieldPlatform .module-api-health-row.is-inline {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html.staging-ui #viewStrategyShieldPlatform .shield-plat-table-wrap,
+  html.staging-ui #viewStrategyShieldPlatform .shield-plat-table {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  /* 产品手册宽表：横向滚动，不撑破整页 */
+  html.staging-ui #viewHandbook:not(.hidden),
+  html.staging-ui .content.content-handbook {
+    overflow-x: auto !important;
+    max-width: 100% !important;
+  }
+
+  html.staging-ui #viewHandbook table {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.kuaishou.alliance-workbench.guardian</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/wqy/Library/Application Support/alliance-workbench/start-guardian.sh</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>ORIENT_SESSION_DIR</key>
+        <string>/Users/wqy/Library/Application Support/alliance-workbench/orient_session</string>
+        <key>PLAYWRIGHT_BROWSERS_PATH</key>
+        <string>/Users/wqy/Library/Caches/ms-playwright</string>
+        <key>PORT</key>
+        <string>3000</string>
+        <key>PATH</key>
+        <string>/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin</string>
+        <key>HOME</key>
+        <string>/Users/wqy</string>
+    </dict>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+    <key>StandardOutPath</key>
+    <string>/Users/wqy/Library/Application Support/alliance-workbench/guardian-launchd.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/wqy/Library/Application Support/alliance-workbench/guardian-launchd.log</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/wqy/Library/Application Support/alliance-workbench/app</string>
+</dict>
+</plist>

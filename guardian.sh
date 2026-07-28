@@ -1,6 +1,11 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════════════
-#  联盟诊断工作台 — 守护脚本
+#  联盟诊断工作台 — 守护脚本（生产唯一入口）
+#
+#  写死约定：在本仓库 Documents 目录运行，端口 3000。
+#  标准启动：bash scripts/start-production.sh
+#           （内部 = nohup bash guardian.sh run）
+#  不要用 LaunchAgent / Application Support。
 #
 #  功能：
 #    1. 自动检测服务是否存活（每 30 秒）
@@ -8,20 +13,21 @@
 #    3. 日志输出到 guardian.log
 #
 #  使用方式：
-#    启动守护：  bash guardian.sh
-#    后台运行：  nohup bash guardian.sh > /dev/null 2>&1 &
+#    生产保活：  bash guardian.sh run          # 或 scripts/start-production.sh
+#    后台 fork： bash guardian.sh              # 兼容旧用法
 #    停止守护：  bash guardian.sh stop
 #    查看状态：  bash guardian.sh status
 # ═══════════════════════════════════════════════════════════════
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PORT=${1:-3000}
+PORT="${PORT:-3000}"
 PID_FILE="$PROJECT_DIR/.guardian.pid"
 LOG_FILE="$PROJECT_DIR/guardian.log"
 CHECK_INTERVAL=30  # 秒
 
 # ─── 环境变量传递给 Python ───
-export ORIENT_SESSION_DIR="$PROJECT_DIR/server/orient_session"
+export ORIENT_SESSION_DIR="${ORIENT_SESSION_DIR:-$PROJECT_DIR/server/orient_session}"
+export PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-$HOME/Library/Caches/ms-playwright}"
 
 # ─── 颜色 ───
 RED='\033[0;31m'
@@ -51,22 +57,48 @@ get_server_pid() {
     lsof -i :$PORT -sTCP:LISTEN 2>/dev/null | grep "Python" | awk '{print $2}' | head -1
 }
 
-# ─── 清理残留 Playwright Chrome 进程 ───
+# ─── 清理残留 Playwright Chrome（仅本会话目录，禁止全局 pkill）───
 cleanup_chrome() {
-    local count
-    count=$(ps aux | grep "chrome-mac-arm64/Google Chrome for Testing" | grep -v grep | wc -l | tr -d ' ')
-    if [ "$count" -gt 0 ]; then
-        log_warn "发现 $count 个残留 Playwright Chrome 进程，正在清理…"
-        pkill -9 -f "chrome-mac-arm64/Google Chrome for Testing" 2>/dev/null
-        sleep 2
-        local count2
-        count2=$(ps aux | grep "chrome-mac-arm64/Google Chrome for Testing" | grep -v grep | wc -l | tr -d ' ')
-        if [ "$count2" -gt 0 ]; then
-            log_err "仍有 $count2 个 Chrome 进程未清理"
-        else
-            log_ok "残留 Chrome 进程已清理"
+    local session_dir="${ORIENT_SESSION_DIR:-$PROJECT_DIR/server/orient_session}"
+    local pid
+    local matched=0
+    local killed=0
+    local round
+
+    for round in 1 2 3 4 5; do
+        matched=0
+        killed=0
+        for pid in $(pgrep -f "user-data-dir=${session_dir}" 2>/dev/null || true); do
+            matched=$((matched + 1))
+            if kill -9 "$pid" 2>/dev/null; then
+                killed=$((killed + 1))
+            fi
+        done
+        if [ "$matched" -eq 0 ]; then
+            break
         fi
+        if [ "$round" -eq 1 ]; then
+            log_warn "发现本会话 Playwright Chrome，正在清理（$session_dir）…"
+        fi
+        sleep 1
+    done
+
+    if [ "$killed" -gt 0 ] || [ "$matched" -gt 0 ]; then
+        log_ok "本会话 Chrome 已清理"
     fi
+
+    # 清单例锁，避免下一次窗口抢 profile 秒退
+    /usr/bin/python3 - "$session_dir" <<'PY' 2>/dev/null || true
+import os, sys
+session = sys.argv[1]
+for name in ("SingletonLock", "SingletonCookie", "SingletonSocket"):
+    path = os.path.join(session, name)
+    if os.path.lexists(path):
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
+PY
 }
 
 # ─── 启动服务 ───
@@ -74,11 +106,14 @@ start_server() {
     log "正在启动服务…"
     cd "$PROJECT_DIR"
 
-    # 先清理残留
+    # 先清理本会话残留 Chrome（不碰其他项目的 Chrome for Testing）
     cleanup_chrome
 
-    # 清理旧日志
-    > "$LOG_FILE" 2>/dev/null
+    # 追加分隔线，保留历史日志便于排查闪退
+    {
+        echo ""
+        echo "──────── $(date '+%Y-%m-%d %H:%M:%S') server start ────────"
+    } >> "$LOG_FILE" 2>/dev/null || true
 
     # 启动服务（unbuffered 输出）
     /usr/bin/python3 -u "$PROJECT_DIR/server/app.py" >> "$LOG_FILE" 2>&1 &
@@ -104,13 +139,12 @@ start_server() {
 restart_server() {
     log "正在重启服务…"
 
-    # 杀掉现有服务进程（同时杀掉其子 Chrome 进程）
+    # 杀掉现有服务进程（同时清理本会话 Chrome，避免用户数据目录冲突）
     local pid
     pid=$(get_server_pid)
     if [ -n "$pid" ]; then
-        # 先杀 Chrome 子进程（避免"正在现有的浏览器会话中打开"冲突）
-        pkill -9 -f "chrome-mac-arm64/Google Chrome for Testing" 2>/dev/null
-        sleep 2
+        cleanup_chrome
+        sleep 1
         # 再杀服务进程
         kill "$pid" 2>/dev/null
         log "已发送终止信号到进程 $pid"
@@ -126,7 +160,7 @@ restart_server() {
         sleep 2
     fi
 
-    # 清理残留
+    # 再清一次本会话残留
     cleanup_chrome
 
     # 启动
@@ -221,10 +255,11 @@ show_status() {
         echo -e "  守护进程: ${YELLOW}未启动${NC}"
     fi
 
-    # Playwright 状态
+    # Playwright 状态（按本会话 user-data-dir 探测，避免误报）
+    local session_dir="${ORIENT_SESSION_DIR:-$PROJECT_DIR/server/orient_session}"
     local chrome_count
-    chrome_count=$(ps aux | grep "chrome-mac-arm64/Google Chrome for Testing" | grep -v grep | wc -l | tr -d ' ')
-    if [ "$chrome_count" -gt 0 ]; then
+    chrome_count=$(pgrep -f "user-data-dir=${session_dir}" 2>/dev/null | wc -l | tr -d ' ')
+    if [ "${chrome_count:-0}" -gt 0 ]; then
         echo -e "  Playwright 浏览器: ${GREEN}运行中${NC} ($chrome_count 进程)"
     else
         echo -e "  Playwright 浏览器: ${YELLOW}未启动${NC}"
@@ -240,6 +275,23 @@ show_status() {
             echo -e "  请求模式: ${YELLOW}Playwright 需要登录 SSO${NC}"
         elif [ -n "$source" ]; then
             echo -e "  请求模式: $source"
+        fi
+    fi
+
+    # 服务在、守护无时的补拉提示
+    if is_server_alive; then
+        local g_ok=0
+        if [ -f "$PID_FILE" ]; then
+            local gpid2
+            gpid2=$(cat "$PID_FILE")
+            if kill -0 "$gpid2" 2>/dev/null; then
+                g_ok=1
+            fi
+        fi
+        if [ "$g_ok" -eq 0 ]; then
+            echo -e "  ${YELLOW}提示: 服务在跑但守护未启动，长期保活请执行:${NC}"
+            echo "    bash $PROJECT_DIR/scripts/start-production.sh"
+            echo "    （已健康时会跳过重启并补拉 guardian）"
         fi
     fi
 
@@ -260,6 +312,12 @@ case "${1:-}" in
         else
             start_server
         fi
+        ;;
+    run|foreground)
+        # 生产标准：前台保活（配合 nohup / 终端常驻），不 fork
+        echo "$$" > "$PID_FILE"
+        trap 'rm -f "$PID_FILE"; exit 0' INT TERM EXIT
+        guard_loop
         ;;
     *)
         # 防止重复启动

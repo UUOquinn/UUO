@@ -5,6 +5,8 @@ PID_FILE="$PROJECT_DIR/.staging.pid"
 LOG_FILE="$PROJECT_DIR/staging.log"
 CHECK_INTERVAL=30
 export ORIENT_SESSION_DIR="$PROJECT_DIR/server/orient_session_staging"
+export PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-$HOME/Library/Caches/ms-playwright}"
+export WORKBENCH_STAGING_LITE=1
 export PORT
 
 is_alive() { lsof -i :$PORT -sTCP:LISTEN 2>/dev/null | grep -q "Python"; }

@@ -1,0 +1,20 @@
+---
+description: Frontend UI-only work for this project; avoid page-freeze bugs
+alwaysApply: true
+---
+
+# Frontend UI Guardrails
+
+This project’s ongoing work is **frontend UI only**. Do not change business/API logic unless the user explicitly asks.
+
+## Known freeze cause (must avoid)
+
+- Never attach a `MutationObserver` that rewrites the same DOM it observes (e.g. setting `textContent` / inserting hint nodes under an observed root).
+- That pattern caused a dead loop: page spinner / unclickable UI while `:3000` service stayed healthy.
+- Prefer one-shot mount + view-switch hooks / short timeouts. If you must observe, disconnect while mutating and skip no-op updates.
+
+## Input hint UI convention
+
+- Non-home modules (策略查询 / 审核 / 延期): **no placeholder / no tip div inside the textarea frame**.
+- Keep a single **outside** tip block above the input (e.g. `.module-hint-slot` / `.module-input-tip`).
+- Keep home composer behavior unchanged unless asked.

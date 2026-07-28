@@ -3,10 +3,8 @@
 
 职责：
   1. 托管前端静态文件（index.html / app.js / styles.css）
-  2. 代理 /api/dataset/query  → KwaiBI datasetDataQuery
-  3. 代理 /api/dataset/metadata → KwaiBI metadataSearchV2
-  4. 策略查询 /api/strategy/meta、/api/strategy/query（本地 Excel 导入数据）
-  5. Orient 平台代理：策略延期 / 审核 / 撤回等操作
+  2. 策略查询 /api/strategy/meta、/api/strategy/query（Operation 实时 orientControl/query）
+  3. Orient 平台代理：策略延期 / 审核 / 撤回等操作
 
 请求方式（三级降级）：
   优先级1: Playwright API 代理（orient_browser.py）
@@ -29,12 +27,6 @@ Cookie 管理：
   Chrome CDP 模式：Chrome 守护线程自动保持登录态
   urllib 模式：从 server/cookie.json 读取手动配置的 Cookie
 
-数据集：
-  85587  — 离线主效果
-  129496 — 实时主效果
-  207512 — 请求链路过滤原因
-  103846 — 召回/粗排/精排漏斗
-
 启动方式：
   python3 server/app.py
   python3 server/app.py 3000
@@ -43,6 +35,8 @@ Cookie 管理：
 import http.server
 import json
 import os
+import re
+import socketserver
 import sys
 import time
 import threading
@@ -59,24 +53,70 @@ class CookieExpiredError(Exception):
 
 from chrome_proxy import fetch_via_chrome, get_chrome_cookie_status as _get_chrome_cookie_status, start_guard
 from orient_browser import orient_get as _pw_get, orient_post as _pw_post, ensure_ready as _pw_ensure, get_status as _pw_status
-from strategy_data import store, parse_query_message
+from modules.strategy_query import (
+    get_live_meta as _sq_get_meta,
+    query_live as _sq_query_live,
+    parse_query_message as _sq_parse,
+)
+
+# ─── v5.5 新功能分包：策略类型探测模块 ───
+# 解决扶持策略查询失败：orientControl/get 对不存在的策略也返回 status=200
+# 新模块 server/modules/strategy_probe.py 提供 has_strategy_data 检查
+from modules.strategy_probe import has_strategy_data, STRATEGY_API_PREFIXES as _STRATEGY_API_PREFIXES
+
+# ─── v5.8 策略自动延期托管（表驱动） ───
+from modules.strategy_postpone.automation_postpone import (
+    load_registry as _postpone_load_registry,
+    upsert_item as _postpone_upsert_item,
+    delete_item as _postpone_delete_item,
+    load_editors as _postpone_load_editors,
+    upsert_editor as _postpone_upsert_editor,
+    delete_editor as _postpone_delete_editor,
+    get_operator_perms as _postpone_get_perms,
+    get_postpone_status,
+    run_postpone_once,
+    start_postpone_daemon,
+    POSTPONE_INTERVAL,
+    POSTPONE_HOUR,
+    POSTPONE_MINUTE,
+)
 
 # ─── 配置 ───
 PORT = int(os.environ.get("PORT", "3000"))
-KWABI_BASE = os.environ.get(
-    "KWABI_BASE", "https://kwaibi.corp.kuaishou.com"
-)
-DATASET_QUERY_PATH = os.environ.get(
-    "DATASET_QUERY_PATH", "/api/v1/dataset/data/query"
-)
-METADATA_SEARCH_PATH = os.environ.get(
-    "METADATA_SEARCH_PATH", "/api/v1/dataset/metadata/search"
-)
 
 STATIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 # ─── 服务端共享 Cookie 文件（降级模式） ───
 SERVER_COOKIE_FILE = os.path.join(os.path.dirname(__file__), "cookie.json")
+
+# ─── v5.6+ 策略审核域（modules/strategy_audit）───
+from modules.strategy_audit import (
+    change_approve_status as _audit_change_status,
+    run_flow as _audit_run_flow,
+    push_full_forced as _audit_push_full,
+    load_whitelist as _load_realtime_whitelist,
+    auto_approve_status as _auto_approve_get_status,
+    auto_approve_trigger as _auto_approve_trigger,
+    start_auto_approve_daemon as _start_auto_approve_daemon,
+    query_by_creator as _audit_query_by_creator,
+)
+from modules.strategy_audit.auto_approve import AUTO_APPROVE_INTERVAL
+
+# ─── 共享工作台日志（JSONL，最长 30 天）───
+from modules.workbench_log import (
+    LOG_TYPES as _WB_LOG_TYPES,
+    DEFAULT_LIMIT as _WB_LOG_DEFAULT_LIMIT,
+    append as _wb_log_append,
+    list_logs as _wb_log_list,
+    prune_all as _wb_log_prune_all,
+    clear_logs as _wb_log_clear,
+    delete_logs as _wb_log_delete,
+)
+
+# 审核人列表短缓存，避免健康探测/多标签重复打满 Playwright
+_AUDIT_USERS_CACHE = {"ts": 0.0, "data": None}
+_AUDIT_USERS_CACHE_TTL = 90
+_AUDIT_USERS_CACHE_LOCK = threading.Lock()
 
 
 def _load_server_cookie_file():
@@ -89,46 +129,63 @@ def _load_server_cookie_file():
             cookie = (cfg.get("kwabi") or "").strip()
             if "请填写" in cookie:
                 cookie = ""
-            return cookie
+            return _sanitize_cookie_header(cookie)
     except Exception:
         return ""
 
 
-# ─── 数据集列表 ───
-DATASETS = [
-    {
-        "id": "85587",
-        "name": "离线主效果数据",
-        "type": "offline",
-        "description": "T-1 及历史数据，对比口径：目标日 vs 前一天",
-    },
-    {
-        "id": "129496",
-        "name": "实时主效果数据",
-        "type": "realtime",
-        "description": "当天实时累计，对比口径：今日当前累计 vs 昨日同时间段",
-    },
-    {
-        "id": "207512",
-        "name": "请求链路过滤原因",
-        "type": "drill",
-        "description": "有效请求率下降时下钻，查过滤比/过滤次数/请求承接率",
-    },
-    {
-        "id": "103846",
-        "name": "召回/粗排/精排漏斗",
-        "type": "drill",
-        "description": "有效填充率下降时下钻，查召粗精混前曝漏斗通过率",
-    },
-]
+def _cookie_file_meta():
+    """读取 cookie.json 元信息（不回传 Cookie 内容）"""
+    meta = {"updatedAt": "", "source": "", "configured": False}
+    if not os.path.exists(SERVER_COOKIE_FILE):
+        return meta
+    try:
+        with open(SERVER_COOKIE_FILE, "r", encoding="utf-8") as f:
+            cfg = json.load(f) or {}
+        cookie = (cfg.get("kwabi") or "").strip()
+        if "请填写" in cookie:
+            cookie = ""
+        meta["updatedAt"] = str(cfg.get("updatedAt") or "")
+        meta["source"] = str(cfg.get("source") or "")
+        meta["configured"] = bool(_sanitize_cookie_header(cookie))
+    except Exception:
+        pass
+    return meta
 
-# ─── 筛选字段中文→英文字段映射 ───
-FILTER_FIELD_MAP = {
-    "uid": "开发者id",
-    "app_id": "应用id",
-    "pos_id": "广告位id",
-    "ad_style": "广告场景",
-}
+
+def _sanitize_cookie_header(raw):
+    """urllib 要求 Cookie 头为 latin-1；含中文占位符时视为未配置。"""
+    if not raw:
+        return ""
+    try:
+        raw.encode("latin-1")
+        return raw
+    except UnicodeEncodeError:
+        return ""
+
+
+def _pw_err_allows_fallback(err):
+    """Playwright 失败是否允许降级到 Chrome/urllib。
+
+    上游已明确返回 HTTP 4xx/5xx（非登录失效）时勿假降级：
+    urllib 无 KSAP，几乎必然再失败，徒增噪音。
+    仅传输层不可用（未启动/超时等）才降级。
+    """
+    if not err:
+        return False
+    if err in ("COOKIE_EXPIRED", "SSO_RECOVERING"):
+        return False
+    if err.startswith("HTTP "):
+        # "HTTP 500" / "HTTP 502: ..."
+        parts = err.split()
+        if len(parts) >= 2:
+            code_str = parts[1].split(":", 1)[0]
+            if code_str.isdigit():
+                code = int(code_str)
+                if code >= 400:
+                    return False
+        return False
+    return True
 
 
 class ProxyHandler(http.server.SimpleHTTPRequestHandler):
@@ -142,15 +199,47 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         """GET 请求：静态文件 + API"""
-        if self.path == "/api/dataset/list":
-            self._send_json(200, {"success": True, "data": DATASETS})
-            return
-        if self.path == "/api/strategy/meta":
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        qs = urllib.parse.parse_qs(parsed.query)
+
+        if path == "/api/strategy/meta":
             self._handle_strategy_meta()
             return
-        if self.path == "/api/cookie/status":
+        if path == "/api/cookie/status":
             self._handle_cookie_status()
             return
+        if path == "/api/health":
+            self._handle_health()
+            return
+        # ─── 共享工作台日志 ───
+        if path == "/api/workbench/logs":
+            self._handle_workbench_logs_get(qs)
+            return
+        # ─── v5.1 新增：提交审核人列表（不动现有代码） ───
+        if path == "/api/strategy/audit/users":
+            self._handle_audit_users()
+            return
+        # ─── v5.6 新增：实时审核白名单（不动现有代码） ───
+        if path == "/api/strategy/audit/realtime-whitelist":
+            self._handle_realtime_whitelist()
+            return
+        # ─── v5.7 新增：自动审核状态查询 ───
+        if path == "/api/strategy/audit/auto-approve/status":
+            self._handle_auto_approve_status()
+            return
+        # ─── v5.8 自动延期托管表 / 权限 / 状态 ───
+        if path == "/api/strategy/postpone/registry":
+            self._handle_postpone_registry_get()
+            return
+        if path == "/api/strategy/postpone/editors":
+            self._handle_postpone_editors_get()
+            return
+        if path == "/api/strategy/postpone/status":
+            self._handle_postpone_status()
+            return
+        # 静态资源：去掉 query，避免 ?v= 影响文件查找
+        self.path = path
         super().do_GET()
 
     # ─── /api/cookie/status ───
@@ -158,7 +247,10 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
         pw_status = _pw_status()
         pw_login_ok = pw_status.get("loginOk", False)
 
-        chrome_status = _get_chrome_cookie_status()
+        if pw_status.get("initialized"):
+            chrome_status = {"available": False, "hasCookie": False}
+        else:
+            chrome_status = _get_chrome_cookie_status()
         chrome_available = chrome_status.get("available", False)
         chrome_has_cookie = chrome_status.get("hasCookie", False)
 
@@ -184,24 +276,47 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             source = "none"
             hint = "未配置：服务端 Playwright 浏览器会自动弹出登录窗口"
 
+        try:
+            self._send_json(200, {
+                "success": True,
+                "data": {
+                    "source": source,
+                    "serverConfigured": server_configured,
+                    "chromeAvailable": chrome_available,
+                    "chromeHasCookie": chrome_has_cookie,
+                    "playwrightReady": pw_login_ok,
+                    "threadAlive": bool(pw_status.get("threadAlive")),
+                    "cookieUpdatedAt": _cookie_file_meta().get("updatedAt") or "",
+                    "hint": hint,
+                },
+            })
+        except BrokenPipeError:
+            pass
+
+    def _handle_health(self):
+        """轻量健康检查：不打 Orient，专供前端状态面板，避免拖死 Playwright"""
+        pw = _pw_status()
+        cookie_meta = _cookie_file_meta()
+        thread_alive = bool(pw.get("threadAlive"))
+        ok = bool(pw.get("initialized") and pw.get("loginOk") and thread_alive)
         self._send_json(200, {
             "success": True,
             "data": {
-                "source": source,
-                "serverConfigured": server_configured,
-                "chromeAvailable": chrome_available,
-                "chromeHasCookie": chrome_has_cookie,
-                "playwrightReady": pw_login_ok,
-                "hint": hint,
+                "ok": ok,
+                "playwrightReady": bool(pw.get("loginOk")),
+                "playwrightInitialized": bool(pw.get("initialized")),
+                "threadAlive": thread_alive,
+                "queueDepth": int(pw.get("queueDepth") or 0),
+                "ssoWaiting": bool(pw.get("ssoWaiting")),
+                "cookieUpdatedAt": cookie_meta.get("updatedAt") or "",
+                "cookieSource": cookie_meta.get("source") or "",
             },
         })
 
     def do_POST(self):
         """POST 请求：代理 API"""
-        if self.path == "/api/dataset/query":
-            self._handle_dataset_query()
-        elif self.path == "/api/dataset/metadata":
-            self._handle_dataset_metadata()
+        if self.path == "/api/workbench/logs":
+            self._handle_workbench_logs_post()
         elif self.path == "/api/strategy/query":
             self._handle_strategy_query()
         elif self.path == "/api/strategy/renew/get":
@@ -218,6 +333,27 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             self._handle_approve_proxy("changeStatus")
         elif self.path == "/api/strategy/audit/batchPass":
             self._handle_approve_batch()
+        elif self.path == "/api/strategy/audit/flow":
+            self._handle_audit_flow()
+        elif self.path == "/api/strategy/audit/pushFull":
+            self._handle_audit_push_full()
+        # ─── v5.1 新增：按提交审核人查询（不动现有代码） ───
+        elif self.path == "/api/strategy/audit/queryByCreator":
+            self._handle_audit_query_by_creator()
+        # ─── v5.7 新增：手动触发自动审核 ───
+        elif self.path == "/api/strategy/audit/auto-approve/trigger":
+            self._handle_auto_approve_trigger()
+        # ─── v5.8 自动延期托管写接口 ───
+        elif self.path == "/api/strategy/postpone/registry/upsert":
+            self._handle_postpone_registry_upsert()
+        elif self.path == "/api/strategy/postpone/registry/delete":
+            self._handle_postpone_registry_delete()
+        elif self.path == "/api/strategy/postpone/editors/upsert":
+            self._handle_postpone_editors_upsert()
+        elif self.path == "/api/strategy/postpone/editors/delete":
+            self._handle_postpone_editors_delete()
+        elif self.path == "/api/strategy/postpone/trigger":
+            self._handle_postpone_trigger()
         else:
             self._send_json(404, {"success": False, "error": "Not found"})
 
@@ -230,10 +366,18 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
     # ─── /api/strategy/meta ───
     def _handle_strategy_meta(self):
         try:
-            meta = store.get_meta()
+            meta = _sq_get_meta()
+            # 初次进入可能尚未查询过
+            if not meta.get("dataAsOfText"):
+                meta = {
+                    "mode": "live",
+                    "source": "operation-tool orientControl/query",
+                    "total": 0,
+                    "dataAsOfText": "",
+                    "dataAsOf": "",
+                    "hint": "用户查询时实时请求 Operation 平台",
+                }
             self._send_json(200, {"success": True, "data": meta})
-        except FileNotFoundError as e:
-            self._send_json(404, {"success": False, "error": str(e)})
         except Exception as e:
             self._send_json(500, {"success": False, "error": str(e)})
 
@@ -250,7 +394,7 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
         try:
             if message:
-                parsed_result = parse_query_message(message)
+                parsed_result = _sq_parse(message)
                 developer_ids = parsed_result["developerIds"] or developer_ids
                 pos_ids = parsed_result["posIds"] or pos_ids
                 app_ids = parsed_result["appIds"] or app_ids
@@ -265,26 +409,35 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
                 })
                 return
 
-            result = store.query(
+            result, meta = _sq_query_live(
                 developer_ids=developer_ids,
                 pos_ids=pos_ids,
                 app_ids=app_ids,
+                hydrate=True,
             )
-            meta = store.get_meta()
             self._send_json(200, {
                 "success": True,
                 "data": {
                     "parsed": parsed_display,
-                    "matchedBy": result["matchedBy"],
-                    "total": result["total"],
-                    "fields": meta.get("fields", []),
-                    "rows": result["rows"],
+                    "matchedBy": result.get("matchedBy") or {},
+                    "total": result.get("total") or 0,
+                    "fields": [],
+                    "rows": result.get("rows") or [],
+                    "meta": meta,
                 },
             })
-        except FileNotFoundError as e:
-            self._send_json(404, {"success": False, "error": str(e)})
+        except RuntimeError as e:
+            msg = str(e)
+            if msg == "COOKIE_EXPIRED":
+                self._send_json(401, {
+                    "success": False,
+                    "error": "COOKIE_EXPIRED",
+                    "message": "Orient 未登录或 Cookie 过期，请先在服务端完成 Operation 登录",
+                })
+                return
+            self._send_json(502, {"success": False, "error": msg})
         except Exception as e:
-            print(f"[strategy] error: {e}")
+            print(f"[strategy-live] error: {e}")
             self._send_json(500, {"success": False, "error": str(e)})
 
     # ─── 通用 Chrome 代理请求 ───
@@ -391,106 +544,17 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
         """降级模式获取 Cookie"""
         x_kwabi_cookie = self.headers.get("X-Kwabi-Cookie", "")
         if x_kwabi_cookie:
-            return x_kwabi_cookie
+            return _sanitize_cookie_header(x_kwabi_cookie)
         cookie = self.headers.get("Cookie", "")
         if cookie:
-            return cookie
+            return _sanitize_cookie_header(cookie)
         return _load_server_cookie_file()
 
-    # ─── /api/dataset/query ───
-    def _handle_dataset_query(self):
-        body = self._read_json_body()
-        if body is None:
-            return
-
-        dataset_id = body.get("datasetId")
-        if not dataset_id:
-            self._send_json(400, {"success": False, "error": "datasetId is required"})
-            return
-
-        kwabi_payload = self._build_kwabi_payload(body)
-        upstream_url = f"{KWABI_BASE}{DATASET_QUERY_PATH}"
-        print(f"[proxy] POST {upstream_url} dataset={dataset_id}")
-
-        # 优先使用 Chrome 代理
-        resp_data, err = self._chrome_proxy_post(upstream_url, kwabi_payload)
-
-        if err == "COOKIE_EXPIRED":
-            self._send_json(401, {
-                "success": False,
-                "error": "COOKIE_EXPIRED",
-                "message": "Chrome 未登录或 Cookie 已过期，请重新登录",
-            })
-            return
-
-        if err and resp_data is None:
-            # Chrome 代理失败，尝试降级
-            print(f"[proxy] Chrome 代理失败 ({err})，尝试降级 urllib")
-            resp_data, err = self._urllib_post(upstream_url, kwabi_payload)
-            if err:
-                if err == "COOKIE_EXPIRED":
-                    self._send_json(401, {
-                        "success": False,
-                        "error": "COOKIE_EXPIRED",
-                        "message": "Cookie 已过期或未登录，请启动 Chrome 并登录内网",
-                    })
-                else:
-                    self._send_json(500, {"success": False, "error": err})
-                return
-
-        normalized = self._normalize_response(resp_data)
-        self._send_json(200, {"success": True, "data": normalized})
-
-    # ─── /api/dataset/metadata ───
-    def _handle_dataset_metadata(self):
-        body = self._read_json_body()
-        if body is None:
-            return
-
-        dataset_id = body.get("datasetId")
-        if not dataset_id:
-            self._send_json(400, {"success": False, "error": "datasetId is required"})
-            return
-
-        upstream_url = f"{KWABI_BASE}{METADATA_SEARCH_PATH}"
-        print(f"[proxy] POST {upstream_url} dataset={dataset_id}")
-
-        # 优先使用 Chrome 代理
-        resp_data, err = self._chrome_proxy_post(upstream_url, {"datasetId": dataset_id})
-
-        if err == "COOKIE_EXPIRED":
-            self._send_json(401, {
-                "success": False,
-                "error": "COOKIE_EXPIRED",
-                "message": "Chrome 未登录或 Cookie 已过期，请重新登录",
-            })
-            return
-
-        if err and resp_data is None:
-            # Chrome 代理失败，尝试降级
-            resp_data, err = self._urllib_post(upstream_url, {"datasetId": dataset_id})
-            if err:
-                if err == "COOKIE_EXPIRED":
-                    self._send_json(401, {
-                        "success": False,
-                        "error": "COOKIE_EXPIRED",
-                        "message": "Cookie 已过期或未登录",
-                    })
-                else:
-                    self._send_json(500, {"success": False, "error": err})
-                return
-
-        ok, err_msg = self._check_orient_status(resp_data)
-        if ok:
-            self._send_json(200, {"success": True, "data": resp_data})
-        else:
-            self._send_json(200, {"success": False, "error": "ORIENT_FAILED", "message": err_msg, "data": resp_data})
-
     # ─── Playwright 代理请求（策略延期专用） ───
-    def _pw_proxy_get(self, url):
+    def _pw_proxy_get(self, url, timeout=30):
         """通过 Playwright 发 GET 请求"""
         path = url.replace("https://operation-tool.corp.kuaishou.com/operation-tool/rest", "")
-        result = _pw_get(path)
+        result = _pw_get(path, timeout=timeout)
         return self._process_pw_result(result)
 
     def _pw_proxy_post(self, url, body):
@@ -511,6 +575,8 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
         if not result.get("ok"):
             error = result.get("error", "未知错误")
             status = result.get("status", 0)
+            if error == "SSO_RECOVERING":
+                return None, "SSO_RECOVERING"
             if status == 401 or error == "COOKIE_EXPIRED":
                 return None, "COOKIE_EXPIRED"
             return None, error
@@ -567,6 +633,9 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             if err and resp_data is None:
+                if not _pw_err_allows_fallback(err):
+                    print(f"[orient] Playwright 上游错误 ({err})，跳过假降级，继续下一类型")
+                    continue
                 print(f"[orient] Playwright 失败 ({err})，降级 Chrome 代理")
                 resp_data, err = self._chrome_proxy_get(upstream_url)
 
@@ -595,6 +664,12 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
             ok, err_msg = self._check_orient_status(resp_data)
             if ok:
+                # v5.5 修复：status=200 但 data 为空时继续尝试下一个类型
+                # Orient 的 orientControl/get 对不存在的策略也返回 status=200，
+                # 但 data 字段为空。需要用 has_strategy_data 二次校验。
+                if not has_strategy_data(resp_data):
+                    print(f"[orient] {type_label} API 返回空壳 (status=200 但 data 为空)，继续尝试…")
+                    continue
                 # 在返回数据中标注策略类型
                 if resp_data and isinstance(resp_data, dict):
                     resp_data["_strategyType"] = type_label
@@ -642,6 +717,10 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if err and resp_data is None:
+            if not _pw_err_allows_fallback(err):
+                print(f"[orient] Playwright 上游错误 ({err})，跳过假降级")
+                self._send_json(502, {"success": False, "error": err})
+                return
             # 降级到 Chrome CDP 代理
             print(f"[orient] Playwright 失败 ({err})，降级 Chrome 代理")
             resp_data, err = self._chrome_proxy_post(upstream_url, strategy_body)
@@ -719,6 +798,7 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
         """统一三级降级 POST：Playwright → Chrome CDP → urllib
 
         策略延期和审核模块共用此方法，确保同网用户可通过 Playwright 共享 session 使用。
+        上游 HTTP 4xx/5xx（非登录）不降级。
         """
         # 优先级1: Playwright API 代理
         resp_data, err = self._pw_proxy_post(url, payload)
@@ -728,6 +808,10 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
         if err == "COOKIE_EXPIRED":
             return None, "COOKIE_EXPIRED"
+
+        if not _pw_err_allows_fallback(err):
+            print(f"[proxy] Playwright 上游错误 ({err})，跳过假降级")
+            return None, err
 
         # 优先级2: Chrome CDP 代理
         print(f"[proxy] Playwright 失败 ({err})，降级 Chrome 代理")
@@ -760,6 +844,9 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             return None, "COOKIE_EXPIRED"
 
         if err and resp_data is None:
+            if not _pw_err_allows_fallback(err):
+                print(f"[approve] Playwright 上游错误 ({err})，跳过假降级")
+                return None, err
             # 优先级2: Chrome CDP 代理
             print(f"[approve] Playwright 失败 ({err})，降级 Chrome 代理")
             resp_data, err = self._chrome_proxy_post(url, payload)
@@ -779,114 +866,40 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
         return resp_data, err
 
-    # ─── 策略ID → 审核记录ID 转换 ───
-    # approve/changeStatus 接口的 id 参数是审核记录 ID，不是策略 ID
-    # 需要先查询 approve/query 获取审核记录 ID
-    def _resolve_approve_id(self, strategy_id, approve_status=None):
-        """通过 approve/query 查询审核记录 ID
-
-        Args:
-            strategy_id: 策略 ID（ruleId）
-            approve_status: 审核状态过滤（1=待审核, 3=审核驳回, 6=审核通过, 等）
-                            如果为 None，搜索所有状态
-
-        Returns:
-            (approve_id, error_msg) — approve_id 为 None 表示未找到
-        """
-        approve_url = (
-            "https://operation-tool.corp.kuaishou.com"
-            "/operation-tool/rest/approve/query"
-        )
-
-        # 如果指定了审核状态，直接查询
-        if approve_status is not None:
-            payload = {"pager": {"pageNum": 1, "pageSize": 100}, "status": approve_status}
-            resp_data, err = self._proxy_post_for_approve(approve_url, payload)
-            if err:
-                return None, f"查询审核记录失败: {err}"
-            if resp_data:
-                records = resp_data.get("data", {}).get("data", [])
-                for r in records:
-                    if r.get("ruleId") == int(strategy_id):
-                        return r.get("id"), None
-            return None, f"策略 #{strategy_id} 在审核状态 {approve_status} 下未找到审核记录"
-
-        # 未指定审核状态，搜索所有常见状态
-        for status_val in [1, 2, 3, 6, 7, 10]:
-            payload = {"pager": {"pageNum": 1, "pageSize": 100}, "status": status_val}
-            resp_data, err = self._proxy_post_for_approve(approve_url, payload)
-            if err:
-                continue
-            if resp_data:
-                records = resp_data.get("data", {}).get("data", [])
-                for r in records:
-                    if r.get("ruleId") == int(strategy_id):
-                        return r.get("id"), None
-
-        return None, f"策略 #{strategy_id} 未找到审核记录（可能未提交审核）"
-
-    # ─── /api/strategy/audit/changeStatus ───
+    # ─── /api/strategy/audit/changeStatus（委托 strategy_audit）───
     def _handle_approve_proxy(self, action):
         body = self._read_json_body()
         if body is None:
             return
-
         strategy_id = body.get("id")
         target_status = body.get("status")
-
-        # 关键：approve/changeStatus 的 id 是审核记录 ID，不是策略 ID
-        # 需要先查询 approve/query 获取审核记录 ID
-        # 根据目标操作推断审核状态：
-        #   审核通过(6)/审核驳回(3) → 查待审核(1)
-        #   同意发布(2)/拒绝发布(7) → 查审核通过(6)
-        query_status = 1 if target_status in (6, 3) else 6
-        approve_id, resolve_err = self._resolve_approve_id(strategy_id, query_status)
-
-        if resolve_err:
-            # 尝试搜索所有状态
-            approve_id, resolve_err = self._resolve_approve_id(strategy_id)
-
-        if approve_id is None:
-            self._send_json(200, {
-                "success": False,
-                "error": "APPROVE_NOT_FOUND",
-                "message": resolve_err,
-            })
+        if strategy_id is None or target_status is None:
+            self._send_json(400, {"success": False, "error": "id and status are required"})
             return
 
-        # 用审核记录 ID 替换策略 ID
-        payload = {
-            "id": approve_id,  # 审核记录 ID
-            "status": target_status,
-            "reason": body.get("reason", ""),
-        }
-
-        upstream_url = (
-            f"https://operation-tool.corp.kuaishou.com"
-            f"/operation-tool/rest/approve/{action}"
+        result = _audit_change_status(
+            strategy_id,
+            target_status,
+            reason=body.get("reason", ""),
+            creator_id=body.get("creatorId"),
+            approve_id=body.get("approveId"),
         )
-        print(f"[approve] POST {action} strategy_id={strategy_id} → approve_id={approve_id} status={target_status}")
-
-        # 三级降级代理：Playwright → Chrome CDP → urllib
-        resp_data, err = self._proxy_post_for_approve(upstream_url, payload)
-
-        if err == "COOKIE_EXPIRED":
+        if result.get("error") == "COOKIE_EXPIRED":
             self._send_json(401, {
                 "success": False,
                 "error": "COOKIE_EXPIRED",
-                "message": "Orient 未登录，请登录后重试",
+                "message": result.get("message") or "Orient 未登录，请登录后重试",
             })
             return
-
-        if err and resp_data is None:
-            self._send_json(500, {"success": False, "error": err})
-            return
-
-        ok, err_msg = self._check_orient_status(resp_data)
-        if ok:
-            self._send_json(200, {"success": True, "data": resp_data})
+        if result.get("ok"):
+            self._send_json(200, {"success": True, "data": result.get("data")})
         else:
-            self._send_json(200, {"success": False, "error": "ORIENT_FAILED", "message": err_msg, "data": resp_data})
+            self._send_json(200, {
+                "success": False,
+                "error": result.get("error") or "ORIENT_FAILED",
+                "message": result.get("message"),
+                "data": result.get("data"),
+            })
 
     # ─── /api/strategy/audit/batchPass ───
     def _handle_approve_batch(self):
@@ -904,49 +917,23 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
         results = []
         errors = []
-        cookie_expired = False
         for strategy_id in ids:
-            target_status = int(status_val)
-
-            # 策略ID → 审核记录ID
-            query_status = 1 if target_status in (6, 3) else 6
-            approve_id, resolve_err = self._resolve_approve_id(strategy_id, query_status)
-            if approve_id is None:
-                approve_id, resolve_err = self._resolve_approve_id(strategy_id)
-
-            if approve_id is None:
-                errors.append({"id": strategy_id, "error": resolve_err})
-                continue
-
-            upstream_url = (
-                f"https://operation-tool.corp.kuaishou.com"
-                f"/operation-tool/rest/approve/changeStatus"
-            )
-            payload = {"id": approve_id, "status": target_status, "reason": body.get("reason", "")}
-
-            # 三级降级代理：Playwright → Chrome CDP → urllib
-            resp_data, err = self._proxy_post_for_approve(upstream_url, payload)
-
-            if err == "COOKIE_EXPIRED":
-                cookie_expired = True
-                break
-
-            if err:
-                errors.append({"id": strategy_id, "error": err})
+            result = _audit_change_status(strategy_id, int(status_val), reason=body.get("reason", ""))
+            if result.get("error") == "COOKIE_EXPIRED":
+                self._send_json(401, {
+                    "success": False,
+                    "error": "COOKIE_EXPIRED",
+                    "message": "Orient 未登录，请登录后重试",
+                })
+                return
+            if result.get("ok"):
+                results.append({"id": strategy_id, "success": True, "data": result.get("data")})
             else:
-                ok, err_msg = self._check_orient_status(resp_data)
-                if ok:
-                    results.append({"id": strategy_id, "success": True, "data": resp_data})
-                else:
-                    errors.append({"id": strategy_id, "error": err_msg, "detail": resp_data})
-
-        if cookie_expired:
-            self._send_json(401, {
-                "success": False,
-                "error": "COOKIE_EXPIRED",
-                "message": "Orient 未登录，请登录后重试",
-            })
-            return
+                errors.append({
+                    "id": strategy_id,
+                    "error": result.get("message") or result.get("error"),
+                    "detail": result.get("data"),
+                })
 
         self._send_json(200, {
             "success": len(errors) == 0,
@@ -959,6 +946,519 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             }
         })
 
+    # ─── /api/strategy/audit/flow ───
+    def _handle_audit_flow(self):
+        body = self._read_json_body()
+        if body is None:
+            return
+        strategy_id = body.get("id")
+        if strategy_id is None:
+            self._send_json(400, {"success": False, "error": "id is required"})
+            return
+        mode = body.get("mode") or "normal"
+        if mode not in ("normal", "ban", "publish_replay"):
+            self._send_json(400, {"success": False, "error": "mode must be normal|ban|publish_replay"})
+            return
+        result = _audit_run_flow(
+            strategy_id,
+            mode=mode,
+            reason_prefix=body.get("reason", ""),
+            creator_id=body.get("creatorId"),
+            approve_id=body.get("approveId"),
+        )
+        cookie_fail = any(
+            (s or {}).get("error") == "COOKIE_EXPIRED"
+            for s in (result.get("steps") or [])
+        ) or (result.get("push") or {}).get("error") == "COOKIE_EXPIRED"
+        if cookie_fail:
+            self._send_json(401, {
+                "success": False,
+                "error": "COOKIE_EXPIRED",
+                "message": "Orient 未登录，请登录后重试",
+            })
+            return
+        # 编排结果放在 data；success 表示请求层成功，业务成败看 data.ok / stuckAt
+        self._send_json(200, {
+            "success": True,
+            "data": result,
+            "message": None if result.get("ok") else (
+                ((result.get("steps") or [{}])[-1] or {}).get("message")
+                or "审核编排未完全成功"
+            ),
+        })
+
+    # ─── /api/strategy/audit/pushFull ───
+    def _handle_audit_push_full(self):
+        body = self._read_json_body()
+        if body is None:
+            return
+        strategy_id = body.get("id")
+        if strategy_id is None:
+            self._send_json(400, {"success": False, "error": "id is required"})
+            return
+        mode = body.get("mode") or "normal"
+        if mode not in ("normal", "ban"):
+            self._send_json(400, {"success": False, "error": "mode must be normal|ban"})
+            return
+        result = _audit_push_full(strategy_id, mode=mode)
+        if result.get("error") == "COOKIE_EXPIRED":
+            self._send_json(401, {
+                "success": False,
+                "error": "COOKIE_EXPIRED",
+                "message": "Orient 未登录，请登录后重试",
+            })
+            return
+        self._send_json(200, {
+            "success": bool(result.get("ok")),
+            "data": result,
+            "message": result.get("message"),
+            "error": result.get("error"),
+        })
+
+    # ═══════════════════════════════════════════════════════
+    #  共享工作台日志（JSONL，最长 30 天，全员可见）
+    # ═══════════════════════════════════════════════════════
+
+    def _handle_workbench_logs_get(self, qs):
+        log_type = (qs.get("type") or [""])[0].strip().lower()
+        if not log_type:
+            self._send_json(400, {
+                "success": False,
+                "error": "type is required",
+                "types": list(_WB_LOG_TYPES),
+            })
+            return
+        try:
+            limit_raw = (qs.get("limit") or [str(_WB_LOG_DEFAULT_LIMIT)])[0]
+            limit = int(limit_raw)
+        except (TypeError, ValueError):
+            limit = _WB_LOG_DEFAULT_LIMIT
+        since_ts = None
+        if qs.get("since"):
+            try:
+                since_ts = int((qs.get("since") or ["0"])[0])
+            except (TypeError, ValueError):
+                since_ts = None
+        try:
+            items = _wb_log_list(log_type, since_ts=since_ts, limit=limit)
+        except ValueError as e:
+            self._send_json(400, {"success": False, "error": str(e)})
+            return
+        except Exception as e:
+            self._send_json(500, {"success": False, "error": str(e)})
+            return
+        self._send_json(200, {
+            "success": True,
+            "data": {"type": log_type, "items": items, "count": len(items)},
+        })
+
+    def _handle_workbench_logs_post(self):
+        body = self._read_json_body()
+        if body is None:
+            return
+        log_type = (body.get("type") or "").strip().lower()
+        action = (body.get("action") or "").strip().lower()
+
+        # 清空 / 按 id 删除（失败日志等需手动清理）
+        if action in ("clear", "delete"):
+            if not log_type:
+                self._send_json(400, {
+                    "success": False,
+                    "error": "type is required",
+                    "types": list(_WB_LOG_TYPES),
+                })
+                return
+            try:
+                if action == "clear":
+                    removed = _wb_log_clear(log_type)
+                else:
+                    ids = body.get("ids")
+                    if not isinstance(ids, list):
+                        self._send_json(400, {"success": False, "error": "ids must be a list"})
+                        return
+                    removed = _wb_log_delete(log_type, ids)
+            except ValueError as e:
+                self._send_json(400, {"success": False, "error": str(e)})
+                return
+            except Exception as e:
+                self._send_json(500, {"success": False, "error": str(e)})
+                return
+            self._send_json(200, {
+                "success": True,
+                "data": {"type": log_type, "action": action, "removed": removed},
+            })
+            return
+
+        text = body.get("text")
+        meta = body.get("meta") if isinstance(body.get("meta"), dict) else {}
+        op = (
+            (self.headers.get("X-Postpone-Operator") or "").strip()
+            or (body.get("operator") or "").strip()
+        )
+        ts = body.get("ts")
+        try:
+            entry = _wb_log_append(
+                log_type,
+                text if isinstance(text, str) else str(text or ""),
+                operator=op,
+                meta=meta,
+                ts=int(ts) if ts is not None else None,
+            )
+        except ValueError as e:
+            self._send_json(400, {"success": False, "error": str(e)})
+            return
+        except Exception as e:
+            self._send_json(500, {"success": False, "error": str(e)})
+            return
+        self._send_json(200, {"success": True, "data": entry})
+
+    # ═══════════════════════════════════════════════════════
+    #  v5.1 新增：提交审核人维度审核（不动现有代码）
+    #
+    #  新增两个接口：
+    #    GET  /api/strategy/audit/users         — 获取提交审核人列表
+    #    POST /api/strategy/audit/queryByCreator — 按审核人查询待审核策略
+    #
+    #  复用现有三级降级代理（Playwright → Chrome CDP → urllib），
+    #  确保同网用户通过 Playwright 共享 session 直接可用。
+    #  SSO 自动保活机制（orient_browser.py 心跳）确保永久可用。
+    # ═══════════════════════════════════════════════════════
+
+    # ─── /api/strategy/audit/realtime-whitelist ───
+    def _handle_realtime_whitelist(self):
+        """返回当前实时审核白名单列表（支持热更新）"""
+        whitelist = _load_realtime_whitelist()
+        self._send_json(200, {"success": True, "data": whitelist})
+
+    # ─── /api/strategy/audit/auto-approve/status ───
+    def _handle_auto_approve_status(self):
+        """返回自动审核引擎状态：运行中/上次结果/日志"""
+        self._send_json(200, {"success": True, "data": _auto_approve_get_status()})
+
+    # ─── /api/strategy/audit/auto-approve/trigger ───
+    def _handle_auto_approve_trigger(self):
+        """手动触发一次自动审核（不等守护线程轮询）"""
+        ok, err = _auto_approve_trigger()
+        if not ok:
+            self._send_json(200, {
+                "success": False,
+                "error": err or "ALREADY_RUNNING",
+                "message": "自动审核正在执行中，请稍后",
+            })
+            return
+        self._send_json(200, {
+            "success": True,
+            "message": "自动审核已触发，请通过 /api/strategy/audit/auto-approve/status 查看进度",
+        })
+
+    # ═══════════════════════════════════════════════════════
+    #  v5.8 策略自动延期托管（表驱动 + 编辑权限）
+    # ═══════════════════════════════════════════════════════
+
+    def _postpone_operator(self):
+        return (self.headers.get("X-Postpone-Operator") or "").strip()
+
+    def _handle_postpone_registry_get(self):
+        op = self._postpone_operator()
+        perms = _postpone_get_perms(op)
+        data = _postpone_load_registry()
+        self._send_json(200, {
+            "success": True,
+            "data": {
+                "items": data.get("items") or [],
+                "perms": perms,
+            },
+        })
+
+    def _handle_postpone_editors_get(self):
+        op = self._postpone_operator()
+        perms = _postpone_get_perms(op)
+        editors = _postpone_load_editors()
+        self._send_json(200, {
+            "success": True,
+            "data": {
+                "admins": editors.get("admins") or [],
+                "editors": editors.get("editors") or [],
+                "perms": perms,
+            },
+        })
+
+    def _handle_postpone_status(self):
+        self._send_json(200, {"success": True, "data": get_postpone_status()})
+
+    def _handle_postpone_registry_upsert(self):
+        body = self._read_json_body()
+        if body is None:
+            return
+        op = self._postpone_operator() or (body.get("operator") or "").strip()
+        perms = _postpone_get_perms(op)
+        if not perms.get("canEdit"):
+            self._send_json(403, {
+                "success": False,
+                "error": "FORBIDDEN",
+                "message": "无编辑权限：请填写操作人账号，并确认已在编辑白名单中（admins 为空时填写账号即可开放编辑）",
+                "perms": perms,
+            })
+            return
+        sid = body.get("strategy_id")
+        if sid is None:
+            self._send_json(400, {"success": False, "error": "strategy_id is required"})
+            return
+        try:
+            item = _postpone_upsert_item(
+                int(sid),
+                enabled=bool(body.get("enabled", True)),
+                owner=str(body.get("owner") or ""),
+                renew_months=int(body.get("renew_months") or 1),
+                note=str(body.get("note") or ""),
+                operator=op,
+            )
+            self._send_json(200, {"success": True, "data": item, "perms": perms})
+        except Exception as e:
+            self._send_json(500, {"success": False, "error": str(e)})
+
+    def _handle_postpone_registry_delete(self):
+        body = self._read_json_body()
+        if body is None:
+            return
+        op = self._postpone_operator() or (body.get("operator") or "").strip()
+        perms = _postpone_get_perms(op)
+        if not perms.get("canEdit"):
+            self._send_json(403, {
+                "success": False,
+                "error": "FORBIDDEN",
+                "message": "无编辑权限",
+                "perms": perms,
+            })
+            return
+        sid = body.get("strategy_id")
+        if sid is None:
+            self._send_json(400, {"success": False, "error": "strategy_id is required"})
+            return
+        ok = _postpone_delete_item(int(sid))
+        if not ok:
+            self._send_json(404, {"success": False, "error": "NOT_FOUND", "message": f"策略 {sid} 不在托管表中"})
+            return
+        self._send_json(200, {"success": True, "deleted": int(sid)})
+
+    def _handle_postpone_editors_upsert(self):
+        body = self._read_json_body()
+        if body is None:
+            return
+        op = self._postpone_operator() or (body.get("operator") or "").strip()
+        perms = _postpone_get_perms(op)
+        if not perms.get("canManageEditors"):
+            self._send_json(403, {
+                "success": False,
+                "error": "FORBIDDEN",
+                "message": "仅管理员可维护编辑权限（开放模式下需先填写操作人账号）",
+                "perms": perms,
+            })
+            return
+        name = (body.get("name") or "").strip()
+        if not name:
+            self._send_json(400, {"success": False, "error": "name is required"})
+            return
+        as_admin = bool(body.get("asAdmin", False))
+        data = _postpone_upsert_editor(name, as_admin=as_admin, operator=op)
+        self._send_json(200, {
+            "success": True,
+            "data": data,
+            "perms": _postpone_get_perms(op),
+        })
+
+    def _handle_postpone_editors_delete(self):
+        body = self._read_json_body()
+        if body is None:
+            return
+        op = self._postpone_operator() or (body.get("operator") or "").strip()
+        perms = _postpone_get_perms(op)
+        if not perms.get("canManageEditors"):
+            self._send_json(403, {
+                "success": False,
+                "error": "FORBIDDEN",
+                "message": "仅管理员可维护编辑权限",
+                "perms": perms,
+            })
+            return
+        name = (body.get("name") or "").strip()
+        if not name:
+            self._send_json(400, {"success": False, "error": "name is required"})
+            return
+        data = _postpone_delete_editor(name, operator=op)
+        self._send_json(200, {
+            "success": True,
+            "data": data,
+            "perms": _postpone_get_perms(op),
+        })
+
+    def _handle_postpone_trigger(self):
+        status = get_postpone_status()
+        if status.get("running"):
+            self._send_json(200, {
+                "success": False,
+                "error": "ALREADY_RUNNING",
+                "message": "自动延期正在执行中",
+            })
+            return
+
+        def _run():
+            run_postpone_once()
+
+        threading.Thread(target=_run, daemon=True, name="postpone-trigger").start()
+        self._send_json(200, {"success": True, "message": "已触发自动延期扫描"})
+
+    # ─── /api/strategy/audit/users ───
+    def _handle_audit_users(self):
+        """获取提交审核人列表——代理 Orient common/listUser
+
+        复用三级降级 GET 代理（与 _handle_orient_get 相同模式）。
+        同网用户通过 Playwright 共享 session 直接可用。
+        """
+        now = time.time()
+        with _AUDIT_USERS_CACHE_LOCK:
+            cached = _AUDIT_USERS_CACHE.get("data")
+            if cached is not None and (now - float(_AUDIT_USERS_CACHE.get("ts") or 0)) < _AUDIT_USERS_CACHE_TTL:
+                self._send_json(200, {"success": True, "data": cached, "cached": True})
+                return
+
+        upstream_url = (
+            "https://operation-tool.corp.kuaishou.com"
+            "/operation-tool/rest/common/listUser"
+        )
+        print(f"[audit-users] GET {upstream_url}")
+
+        # 优先 Playwright
+        resp_data, err = self._pw_proxy_get(upstream_url, timeout=15)
+
+        if err == "SSO_RECOVERING":
+            self._send_json(503, {
+                "success": False,
+                "error": "SSO_RECOVERING",
+                "message": "Orient 登录恢复中，请 10 秒后刷新",
+            })
+            return
+
+        if err == "COOKIE_EXPIRED":
+            self._send_json(401, {
+                "success": False,
+                "error": "COOKIE_EXPIRED",
+                "message": "Orient 未登录，请在浏览器窗口中登录",
+            })
+            return
+
+        if err and resp_data is None:
+            if not _pw_err_allows_fallback(err):
+                print(f"[audit-users] Playwright 上游错误 ({err})，跳过假降级")
+                self._send_json(502, {"success": False, "error": err})
+                return
+            # 降级 Chrome CDP
+            print(f"[audit-users] Playwright 失败 ({err})，降级 Chrome 代理")
+            resp_data, err = self._chrome_proxy_get(upstream_url)
+            if err == "COOKIE_EXPIRED":
+                self._send_json(401, {
+                    "success": False,
+                    "error": "COOKIE_EXPIRED",
+                    "message": "Chrome 未登录 Orient 平台",
+                })
+                return
+            if err and resp_data is None:
+                # 降级 urllib
+                print(f"[audit-users] Chrome 代理也失败 ({err})，降级 urllib")
+                cookie_header = self._get_cookie_header_fallback()
+                resp_data, err = self._urllib_get(upstream_url, cookie_header)
+                if err:
+                    if err == "COOKIE_EXPIRED":
+                        self._send_json(401, {
+                            "success": False,
+                            "error": "COOKIE_EXPIRED",
+                            "message": "Cookie 已过期或未登录",
+                        })
+                    else:
+                        self._send_json(500, {"success": False, "error": err})
+                    return
+
+        ok, err_msg = self._check_orient_status(resp_data)
+        if ok:
+            user_list = (resp_data or {}).get("data", {}).get("userList", [])
+            with _AUDIT_USERS_CACHE_LOCK:
+                _AUDIT_USERS_CACHE["ts"] = time.time()
+                _AUDIT_USERS_CACHE["data"] = user_list
+            self._send_json(200, {"success": True, "data": user_list})
+        else:
+            self._send_json(200, {
+                "success": False,
+                "error": "ORIENT_FAILED",
+                "message": err_msg,
+                "data": resp_data,
+            })
+
+    # ─── /api/strategy/audit/queryByCreator ───
+    def _handle_audit_query_by_creator(self):
+        """按提交审核人查询审核记录——复用 approve/query 接口
+
+        请求体: {creatorId: 1780492464, status: 1}
+          - creatorId: 提交审核人的数字ID（从 listUser 获取）
+          - status: 审核状态（1=待审核, 6=审核通过, 等），默认 1
+
+        approve/query 支持 creatorId 过滤（不支持 creatorName 字符串过滤）。
+        复用 _proxy_post_for_approve 三级降级代理，确保同网用户可用。
+
+        v5.6 说明：白名单仅用于后台自动审核守护线程；手动查询接口不做白名单拦截。
+        """
+        body = self._read_json_body()
+        if body is None:
+            return
+        creator_id = body.get("creatorId")
+        if not creator_id:
+            self._send_json(400, {"success": False, "error": "creatorId is required"})
+            return
+
+        status_val = body.get("status", 1)  # 默认查待审核
+        page_size = body.get("pageSize", 100)
+        print(
+            f"[audit-by-creator] query_by_creator "
+            f"creatorId={creator_id} status={status_val} pageSize={page_size}"
+        )
+
+        # 与自动审共用翻页实现，避免 >100 条截断
+        resp_data, err = _audit_query_by_creator(
+            creator_id, status_val, page_size=int(page_size)
+        )
+
+        if err == "COOKIE_EXPIRED":
+            self._send_json(401, {
+                "success": False,
+                "error": "COOKIE_EXPIRED",
+                "message": "Orient 未登录，请登录后重试",
+            })
+            return
+
+        if err and resp_data is None:
+            self._send_json(500, {"success": False, "error": err})
+            return
+
+        ok, err_msg = self._check_orient_status(resp_data)
+        if ok:
+            records = (resp_data or {}).get("data", {}).get("data", [])
+            total = (resp_data or {}).get("data", {}).get("totalCount", len(records))
+            self._send_json(200, {
+                "success": True,
+                "data": {
+                    "records": records,
+                    "total": total,
+                    "creatorId": creator_id,
+                    "status": status_val,
+                }
+            })
+        else:
+            self._send_json(200, {
+                "success": False,
+                "error": "ORIENT_FAILED",
+                "message": err_msg,
+                "data": resp_data,
+            })
+
     # ─── Orient 业务响应检查 ───
     def _check_orient_status(self, resp_data):
         """检查 Orient 业务状态码，status==200 才认为成功"""
@@ -969,47 +1469,6 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             return True, None
         msg = resp_data.get("message", f"Orient 返回业务状态码 {orient_status}")
         return False, msg
-
-    # ─── 构建转发请求体 ───
-    def _build_kwabi_payload(self, body):
-        payload = {"datasetId": str(body.get("datasetId", ""))}
-
-        if body.get("metrics"):
-            payload["metrics"] = body["metrics"]
-
-        if body.get("dimensions"):
-            payload["dimensions"] = body["dimensions"]
-
-        filters = body.get("filters", {})
-        filter_list = []
-
-        for key, field_name in FILTER_FIELD_MAP.items():
-            values = filters.get(key, [])
-            if values:
-                filter_list.append({
-                    "field": field_name,
-                    "operator": "IN",
-                    "value": values,
-                })
-
-        time_filter = filters.get("__time")
-        if time_filter:
-            filter_list.append({
-                "field": "__time",
-                "operator": "BETWEEN",
-                "value": [time_filter.get("start", ""), time_filter.get("end", "")],
-            })
-
-        if filter_list:
-            payload["filters"] = filter_list
-
-        if body.get("compareTime"):
-            payload["compareTime"] = body["compareTime"]
-
-        if body.get("limit"):
-            payload["limit"] = body["limit"]
-
-        return payload
 
     # ─── 检测上游响应是否为登录页（Cookie 失效） ───
     def _is_login_html(self, raw_text):
@@ -1025,14 +1484,6 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             or "<title>sso" in head
         )
 
-    # ─── 标准化上游响应 ───
-    def _normalize_response(self, raw):
-        inner = raw.get("data", raw)
-        columns = inner.get("columns", inner.get("header", []))
-        rows = inner.get("rows", inner.get("data", inner.get("result", [])))
-        total = inner.get("total", len(rows))
-        return {"columns": columns, "rows": rows, "total": total}
-
     # ─── 工具方法 ───
     def _read_json_body(self):
         content_length = int(self.headers.get("Content-Length", 0))
@@ -1047,21 +1498,28 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             return None
 
     def _send_json(self, status, data):
-        self.send_response(status)
-        self._set_cors_headers()
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+        try:
+            self.send_response(status)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+        except (BrokenPipeError, ConnectionResetError):
+            pass
 
     def _set_cors_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, X-Kwabi-Cookie")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, X-Kwabi-Cookie, X-Postpone-Operator")
         self.send_header("Access-Control-Allow-Credentials", "true")
 
     def log_message(self, format, *args):
         """精简日志输出"""
         print(f"[http] {args[0]}" if args else "")
+
+
+class ThreadingHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    daemon_threads = True
 
 
 def main():
@@ -1076,21 +1534,30 @@ def main():
         if idx + 1 < len(sys.argv):
             port = int(sys.argv[idx + 1])
 
-    try:
-        strategy_meta = store.load()
-        strategy_info = f"{strategy_meta['total']} 条策略"
-    except Exception as e:
-        strategy_info = f"未加载 ({e})"
+    strategy_info = "实时查询（Operation orientControl/query）"
 
-    # 启动 Playwright 浏览器（API 模式代理）
-    # 浏览器在专属线程中运行，通过 queue 与 HTTP 服务器通信
+    # 测试 :3001 — 仅 HTTP + 静态资源，不预启任何后台功能线程
+    staging_lite = port == 3001 or os.environ.get("WORKBENCH_STAGING_LITE") == "1"
+
+    try:
+        pruned = _wb_log_prune_all()
+        print(f"  共享日志已加载（保留≤30天）: {pruned}")
+    except Exception as e:
+        print(f"  ⚠ 共享日志 prune 失败: {e}")
+
     from orient_browser import start as _pw_start, get_status as _pw_status
-    _pw_start()
-    
-    pw_status = _pw_status()
-    
-    # 启动 Chrome 守护线程（降级模式）
-    start_guard()
+
+    if staging_lite:
+        print("  ⚠ 测试环境：仅启动 Orient Playwright；不启 Chrome 守护 / 自动审核 / 自动延期")
+        _pw_start()
+        pw_status = _pw_status()
+    else:
+        # 启动 Playwright 浏览器（API 模式代理）
+        _pw_start()
+        pw_status = _pw_status()
+        start_guard()
+        _start_auto_approve_daemon()
+        start_postpone_daemon()
 
     # 检查 Chrome 状态
     chrome_status = _get_chrome_cookie_status()
@@ -1114,17 +1581,26 @@ def main():
     except Exception:
         local_ip = "127.0.0.1"
 
-    with http.server.HTTPServer(("", port), ProxyHandler) as server:
+    # 设置 SO_REUSEADDR 避免端口占用问题
+    ThreadingHTTPServer.allow_reuse_address = True
+    with ThreadingHTTPServer(("", port), ProxyHandler) as server:
         print(f"\n  🚀 联盟诊断工作台后端已启动 (Python)")
-        print(f"  📡 代理目标: {KWABI_BASE}")
         print(f"  🌐 本机访问: http://localhost:{port}")
         print(f"  🌐 内网访问: http://{local_ip}:{port}  (同内网用户可打开)")
-        print(f"  📋 数据集: 85587 / 129496 / 207512 / 103846")
         print(f"  📁 静态文件: {STATIC_DIR}")
         print(f"  📊 策略数据: {strategy_info}")
         print(f"  🔧 请求模式: {mode_hint}")
         print(f"  🌐 Playwright: {'✓ 已就绪' if pw_status.get('loginOk') else '需登录 (python3 server/orient_browser.py --login)'}")
         print(f"  🛡 降级模式: Chrome CDP / urllib")
+        if staging_lite:
+            print(f"  🤖 自动审核: 未启动（测试精简模式）")
+            print(f"  ⏱  自动延期: 未启动（测试精简模式）")
+        else:
+            print(f"  🤖 自动审核: 已启动 (间隔 {AUTO_APPROVE_INTERVAL} 秒)")
+            print(
+            f"  ⏱  自动延期: 已启动 (每天 {POSTPONE_HOUR:02d}:{POSTPONE_MINUTE:02d} 定点扫描，"
+            f"剩余≤7 自然日自动延)"
+        )
         print(f"  💡 提示: Playwright API 模式下同内网用户可直接使用\n")
         try:
             server.serve_forever()

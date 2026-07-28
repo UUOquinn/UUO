@@ -32,7 +32,7 @@
     });
     const result = await resp.json();
     if (!result.success) {
-      if (result.error === "COOKIE_EXPIRED" && window.markCookieExpired) window.markCookieExpired();
+      if (result.error === "COOKIE_EXPIRED" && window.markCookieExpired) await window.markCookieExpired();
       throw new Error(result.error || `GET 策略 ${id} 失败`);
     }
     return result.data;
@@ -46,7 +46,7 @@
     });
     const result = await resp.json();
     if (!result.success) {
-      if (result.error === "COOKIE_EXPIRED" && window.markCookieExpired) window.markCookieExpired();
+      if (result.error === "COOKIE_EXPIRED" && window.markCookieExpired) await window.markCookieExpired();
       throw new Error(result.error || `POST 策略 ${id} 失败`);
     }
     // 检查业务层 status（Orient API 返回 {status:200, message:...} 或 {status:412, message:...}）
@@ -134,6 +134,12 @@
     }
     // 强制设置 id
     body.id = detail.id;
+    // Orient mergeEditV2 要求 background 非空；GET 常不返回，延期场景自动补
+    const bg = typeof body.background === "string" ? body.background.trim() : "";
+    if (!bg) {
+      const name = typeof detail.name === "string" ? detail.name.trim() : "";
+      body.background = name || (detail.id != null ? `策略${detail.id}延期续期` : "延期续期");
+    }
     return body;
   }
 
@@ -225,6 +231,9 @@
   }
 
   async function handleRenewal(text) {
+    if (typeof window.recordFunnelHistory === "function") {
+      window.recordFunnelHistory(text, "strategy-renewal");
+    }
     const ids = extractIds(text);
     if (!ids.length) {
       addSystemMsg("<p>未识别到策略 ID，请输入数字 ID（如 13938）</p>");
