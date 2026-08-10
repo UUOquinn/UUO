@@ -67,8 +67,7 @@
   function headers(json) {
     const h = {};
     if (json) h["Content-Type"] = "application/json";
-    const kwabi =
-      typeof window.getKwabiCookie === "function" ? window.getKwabiCookie() : "";
+    const kwabi = localStorage.getItem("kwabi-auth-cookie") || "";
     if (kwabi) {
       h["X-DataAgent-Cookie"] = kwabi;
       h["X-Kwabi-Cookie"] = kwabi;

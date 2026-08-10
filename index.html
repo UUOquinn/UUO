@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=9.31-postpone-form-fix">
   <link rel="stylesheet" href="github-ui.css?v=1.43-api-path-name">
-  <link rel="stylesheet" href="staging-glass.css?v=5.100-dataagent">
+  <link rel="stylesheet" href="staging-glass.css?v=5.102-copy-audit">
   <script>
     // ─── 环境识别 ───
     // 3000 生产 / 3001 测试：共用 github-ui + staging-ui 玻璃主题
@@ -28,17 +28,17 @@
           var settings = document.querySelector('.sidebar-settings');
           if (settings) settings.open = true;
           var s = document.createElement('script');
-          s.src = 'staging-chat.js?v=2.17-dataagent';
+          s.src = 'staging-chat.js?v=2.18-copy-audit';
           s.defer = true;
           document.body.appendChild(s);
           // API 服务状态：独立块，不改业务逻辑
           var h = document.createElement('script');
-          h.src = 'module-api-health.js?v=1.20-dataagent';
+          h.src = 'module-api-health.js?v=1.21-copy-audit';
           h.defer = true;
           document.body.appendChild(h);
           // 非首页：框外「输入提示」块（框内无 placeholder）
           var ih = document.createElement('script');
-          ih.src = 'module-input-hints.js?v=1.12-dataagent';
+          ih.src = 'module-input-hints.js?v=1.13-copy-audit';
           ih.defer = true;
           document.body.appendChild(ih);
         });
@@ -334,9 +334,11 @@
             <header class="agent-chat-header">
               <div>
                 <h1>Data Agent</h1>
-                <p>自然语言探索查数（远端执行，本机轻量代理）</p>
+                <p>自然语言探索查数</p>
               </div>
-              <span id="daMetaBadge" class="strategy-meta-badge">就绪</span>
+              <div class="audit-header-actions">
+                <span id="daMetaBadge" class="strategy-meta-badge">就绪</span>
+              </div>
             </header>
 
             <div id="daChatMessages" class="agent-chat-messages" aria-live="polite"></div>
@@ -351,7 +353,7 @@
                       rows="3"
                       placeholder=""
                     ></textarea>
-                    <button id="daChatSend" class="agent-send-btn chat-mod-send" type="button" title="发送">
+                    <button id="daChatSend" class="agent-send-btn chat-mod-send" type="button" title="执行">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
@@ -1366,7 +1368,7 @@ sequenceDiagram
   <script src="strategy-shield-platform.js?v=1.16-multi-select"></script>
   <script src="strategy-postpone.js?v=1.10"></script>
   <script src="strategy-audit.js?v=5.60-orient-contract"></script>
-  <script src="dataagent.js?v=1.0-align"></script>
+  <script src="dataagent.js?v=1.1-copy-audit"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script src="handbook.js?v=1.2-audit-logic"></script>
 </body>
