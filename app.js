@@ -118,13 +118,15 @@ function switchView(view) {
   document.getElementById("viewStrategyAudit")?.classList.toggle("hidden", view !== "strategy-audit");
   document.getElementById("viewStrategyRenewal")?.classList.toggle("hidden", view !== "strategy-renewal");
   document.getElementById("viewStrategyShieldPlatform")?.classList.toggle("hidden", view !== "strategy-shield-platform");
+  document.getElementById("viewDataAgent")?.classList.toggle("hidden", view !== "dataagent");
   document.getElementById("viewHandbook")?.classList.toggle("hidden", view !== "handbook");
 
   const isFullChat =
     view === "strategy-query" ||
     view === "strategy-audit" ||
     view === "strategy-renewal" ||
-    view === "strategy-shield-platform";
+    view === "strategy-shield-platform" ||
+    view === "dataagent";
   const isHome = view === "home";
   const isHandbook = view === "handbook";
   document.querySelector(".content")?.classList.toggle("content-strategy-query", isFullChat);
@@ -138,6 +140,7 @@ function switchView(view) {
     "strategy-audit": "策略审核",
     "strategy-renewal": "策略延期",
     "strategy-shield-platform": "定向屏蔽",
+    dataagent: "Data Agent",
     handbook: "产品手册",
   };
   const crumb = document.getElementById("breadcrumbCurrent");
@@ -165,6 +168,9 @@ function switchView(view) {
   }
   if (view === "strategy-shield-platform" && typeof window.onStrategyShieldPlatformViewEnter === "function") {
     window.onStrategyShieldPlatformViewEnter();
+  }
+  if (view === "dataagent" && typeof window.onDataAgentViewEnter === "function") {
+    window.onDataAgentViewEnter();
   }
   if (view === "handbook") {
     const hash = (location.hash || "").trim();

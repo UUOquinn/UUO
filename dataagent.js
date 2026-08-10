@@ -1,0 +1,164 @@
+/**
+ * Data Agent — 与策略查询同款壳：输入框 + API 服务状态
+ * 走 /api/dataagent/chat · /api/dataagent/status（无 Cookie 弹窗 / 无额外按钮）
+ */
+(function () {
+  "use strict";
+
+  const API_BASE = window.__API_BASE__ || "";
+
+  const state = {
+    loading: false,
+    conversationId: null,
+    bound: false,
+  };
+
+  function escapeHtml(text) {
+    return String(text ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function getMessagesEl() {
+    return document.getElementById("daChatMessages");
+  }
+
+  function setBadge(text, ok) {
+    const badge = document.getElementById("daMetaBadge");
+    if (!badge) return;
+    badge.textContent = text;
+    badge.classList.toggle("err", ok === false);
+  }
+
+  function scrollChatToBottom() {
+    const el = getMessagesEl();
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  function appendMessage(role, html) {
+    const container = getMessagesEl();
+    if (!container) return;
+    const msg = document.createElement("div");
+    msg.className = `agent-msg agent-msg-${role}`;
+    msg.innerHTML = `<div class="agent-msg-bubble"><div class="agent-msg-content">${html}</div></div>`;
+    container.appendChild(msg);
+    scrollChatToBottom();
+  }
+
+  function renderThinking() {
+    const container = getMessagesEl();
+    if (!container) return null;
+    const msg = document.createElement("div");
+    msg.className = "agent-msg agent-msg-assistant";
+    msg.dataset.thinking = "1";
+    msg.innerHTML =
+      '<div class="agent-msg-bubble"><div class="agent-msg-content"><p class="agent-muted">处理中…</p></div></div>';
+    container.appendChild(msg);
+    scrollChatToBottom();
+    return msg;
+  }
+
+  function clearThinking() {
+    getMessagesEl()?.querySelectorAll('[data-thinking="1"]').forEach((n) => n.remove());
+  }
+
+  function headers(json) {
+    const h = {};
+    if (json) h["Content-Type"] = "application/json";
+    const kwabi =
+      typeof window.getKwabiCookie === "function" ? window.getKwabiCookie() : "";
+    if (kwabi) {
+      h["X-DataAgent-Cookie"] = kwabi;
+      h["X-Kwabi-Cookie"] = kwabi;
+    }
+    return h;
+  }
+
+  async function refreshStatus() {
+    try {
+      const resp = await fetch(`${API_BASE}/api/dataagent/status`, {
+        headers: headers(false),
+        signal: AbortSignal.timeout(12000),
+      });
+      const result = await resp.json().catch(() => ({}));
+      const d = result.data || {};
+      if (resp.ok && (d.loggedIn || d.ok)) {
+        setBadge(d.agentName || d.displayName || "已连接", true);
+      } else if (resp.status === 404) {
+        setBadge("接口未接入", false);
+      } else {
+        setBadge(d.hint || result.message || result.error || "未登录", false);
+      }
+    } catch (e) {
+      setBadge("状态检查失败", false);
+    }
+  }
+
+  async function sendChat(text) {
+    const question = String(text || "").trim();
+    if (!question || state.loading) return;
+    state.loading = true;
+
+    appendMessage("user", `<p>${escapeHtml(question)}</p>`);
+    renderThinking();
+    const input = document.getElementById("daChatInput");
+    if (input) input.value = "";
+
+    try {
+      const body = { message: question };
+      if (state.conversationId) body.conversationId = state.conversationId;
+
+      const resp = await fetch(`${API_BASE}/api/dataagent/chat`, {
+        method: "POST",
+        headers: headers(true),
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(130000),
+      });
+      const result = await resp.json().catch(() => ({}));
+      clearThinking();
+
+      if (!resp.ok || result.success === false) {
+        const err = result.message || result.error || `HTTP ${resp.status}`;
+        if (String(result.error || err).includes("COOKIE") || resp.status === 401) {
+          if (typeof window.markCookieExpired === "function") window.markCookieExpired();
+        }
+        appendMessage("assistant", `<p class="agent-muted">${escapeHtml(err)}</p>`);
+        setBadge(String(err), false);
+        return;
+      }
+
+      const d = result.data || {};
+      if (d.conversationId) state.conversationId = d.conversationId;
+      const answer = String(d.answer || "").trim() || "（空回答）";
+      appendMessage("assistant", `<p>${escapeHtml(answer).replace(/\n/g, "<br>")}</p>`);
+      setBadge(d.agentName || "Data Agent", true);
+    } catch (e) {
+      clearThinking();
+      appendMessage("assistant", `<p class="agent-muted">${escapeHtml(e.message || e)}</p>`);
+      setBadge("请求失败", false);
+    } finally {
+      state.loading = false;
+    }
+  }
+
+  function bindOnce() {
+    if (state.bound) return;
+    state.bound = true;
+    document.getElementById("daChatSend")?.addEventListener("click", () => {
+      sendChat(document.getElementById("daChatInput")?.value || "");
+    });
+    document.getElementById("daChatInput")?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendChat(e.target.value);
+      }
+    });
+  }
+
+  window.onDataAgentViewEnter = function onDataAgentViewEnter() {
+    bindOnce();
+    refreshStatus();
+  };
+})();

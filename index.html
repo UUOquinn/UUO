@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=9.31-postpone-form-fix">
   <link rel="stylesheet" href="github-ui.css?v=1.43-api-path-name">
-  <link rel="stylesheet" href="staging-glass.css?v=5.99-api-path-label">
+  <link rel="stylesheet" href="staging-glass.css?v=5.100-dataagent">
   <script>
     // ─── 环境识别 ───
     // 3000 生产 / 3001 测试：共用 github-ui + staging-ui 玻璃主题
@@ -28,17 +28,17 @@
           var settings = document.querySelector('.sidebar-settings');
           if (settings) settings.open = true;
           var s = document.createElement('script');
-          s.src = 'staging-chat.js?v=2.16-no-shield-append';
+          s.src = 'staging-chat.js?v=2.17-dataagent';
           s.defer = true;
           document.body.appendChild(s);
           // API 服务状态：独立块，不改业务逻辑
           var h = document.createElement('script');
-          h.src = 'module-api-health.js?v=1.19-api-path-label';
+          h.src = 'module-api-health.js?v=1.20-dataagent';
           h.defer = true;
           document.body.appendChild(h);
           // 非首页：框外「输入提示」块（框内无 placeholder）
           var ih = document.createElement('script');
-          ih.src = 'module-input-hints.js?v=1.11-dedupe-tip';
+          ih.src = 'module-input-hints.js?v=1.12-dataagent';
           ih.defer = true;
           document.body.appendChild(ih);
         });
@@ -83,6 +83,14 @@
           <button class="nav-item" data-view="strategy-shield-platform" type="button" title="定向屏蔽：路由表 + 工单解析 + 策略目录提审">
             <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25V2.75A1.75 1.75 0 0 0 14.25 1ZM1.5 2.75a.25.25 0 0 1 .25-.25h12.5a.25.25 0 0 1 .25.25v10.5a.25.25 0 0 1-.25.25H1.75a.25.25 0 0 1-.25-.25ZM7 4.75A.75.75 0 0 1 7.75 4h5.5a.75.75 0 0 1 0 1.5h-5.5A.75.75 0 0 1 7 4.75Zm0 3A.75.75 0 0 1 7.75 7h5.5a.75.75 0 0 1 0 1.5h-5.5A.75.75 0 0 1 7 7.75Zm0 3A.75.75 0 0 1 7.75 10h5.5a.75.75 0 0 1 0 1.5h-5.5A.75.75 0 0 1 7 10.75ZM3.5 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm0 3.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm0 3.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/></svg></span>
             定向屏蔽
+          </button>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-label">数据模块</div>
+          <button class="nav-item" data-view="dataagent" type="button" title="Data Agent · 自然语言探索">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M8 1.5a4.5 4.5 0 0 1 4.25 3.02h.1A2.9 2.9 0 0 1 15.2 7.4 2.9 2.9 0 0 1 12.35 10.3H3.65A2.9 2.9 0 0 1 .8 7.4 2.9 2.9 0 0 1 3.65 4.52h.1A4.5 4.5 0 0 1 8 1.5Zm-2.1 10.2a.75.75 0 0 1 .75-.75h2.7a.75.75 0 0 1 0 1.5H6.65a.75.75 0 0 1-.75-.75Zm.9 2.1a.75.75 0 0 1 .75-.75h.9a.75.75 0 0 1 0 1.5h-.9a.75.75 0 0 1-.75-.75Z"/></svg></span>
+            Data Agent
           </button>
         </div>
       </nav>
@@ -310,6 +318,40 @@
                       placeholder=""
                     ></textarea>
                     <button id="strategyChatSend" class="agent-send-btn chat-mod-send" type="button" title="发送">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </footer>
+          </div>
+        </section>
+
+        <section id="viewDataAgent" class="view hidden">
+          <div class="agent-chat-shell">
+            <header class="agent-chat-header">
+              <div>
+                <h1>Data Agent</h1>
+                <p>自然语言探索查数（远端执行，本机轻量代理）</p>
+              </div>
+              <span id="daMetaBadge" class="strategy-meta-badge">就绪</span>
+            </header>
+
+            <div id="daChatMessages" class="agent-chat-messages" aria-live="polite"></div>
+
+            <footer class="agent-chat-composer chat-mod-composer">
+              <div class="chat-mod-input-shell">
+                <div class="chat-mod-input-glow">
+                  <div class="chat-mod-input-inner">
+                    <textarea
+                      id="daChatInput"
+                      class="agent-chat-input chat-mod-input"
+                      rows="3"
+                      placeholder=""
+                    ></textarea>
+                    <button id="daChatSend" class="agent-send-btn chat-mod-send" type="button" title="发送">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
@@ -1316,7 +1358,7 @@ sequenceDiagram
     </div>
   </div>
 
-  <script src="app.js?v=2.7-no-shield-append"></script>
+  <script src="app.js?v=2.8-dataagent"></script>
   <script src="home.js?v=1.21-false-error-filter"></script>
   <script src="strategy-query.js?v=1.15-home-logs"></script>
   <script src="strategy-renewal.js?v=1.3-cookie-status"></script>
@@ -1324,6 +1366,7 @@ sequenceDiagram
   <script src="strategy-shield-platform.js?v=1.16-multi-select"></script>
   <script src="strategy-postpone.js?v=1.10"></script>
   <script src="strategy-audit.js?v=5.60-orient-contract"></script>
+  <script src="dataagent.js?v=1.0-align"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script src="handbook.js?v=1.2-audit-logic"></script>
 </body>

@@ -12,12 +12,14 @@
     "viewStrategyQuery",
     "viewStrategyAudit",
     "viewStrategyRenewal",
+    "viewDataAgent",
   ];
 
   const COMPACT_VIEWS = new Set([
     "strategy-query",
     "strategy-audit",
     "strategy-renewal",
+    "dataagent",
     "home",
   ]);
 
