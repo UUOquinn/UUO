@@ -1651,7 +1651,9 @@ html.staging-ui.staging-compact-chat .content.content-strategy-query {
 
 html.staging-ui.staging-compact-chat #viewStrategyQuery:not(.hidden),
 html.staging-ui.staging-compact-chat #viewStrategyAudit:not(.hidden),
-html.staging-ui.staging-compact-chat #viewStrategyRenewal:not(.hidden) {
+html.staging-ui.staging-compact-chat #viewDataAgent:not(.hidden),
+html.staging-ui.staging-compact-chat #viewStrategyRenewal:not(.hidden),
+html.staging-ui.staging-compact-chat #viewDataAgent:not(.hidden) {
   flex: 1 1 auto !important;
   min-height: 0 !important;
   display: flex !important;
@@ -1794,7 +1796,8 @@ html.staging-ui.staging-compact-chat .renewal-chat-input {
   height: auto !important;
 }
 
-html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-header-actions {
+html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-header-actions,
+html.staging-ui.staging-compact-chat #viewDataAgent .audit-header-actions {
   gap: 8px !important;
 }
 
@@ -1971,7 +1974,9 @@ html.staging-ui.staging-compact-chat .agent-chat-shell {
 /* 三个模块 header 整块移除（标题/徽标都不显示） */
 html.staging-ui.staging-compact-chat #viewStrategyQuery .agent-chat-header,
 html.staging-ui.staging-compact-chat #viewStrategyAudit .agent-chat-header,
-html.staging-ui.staging-compact-chat #viewStrategyRenewal .agent-chat-header {
+html.staging-ui.staging-compact-chat #viewDataAgent .agent-chat-header,
+html.staging-ui.staging-compact-chat #viewStrategyRenewal .agent-chat-header,
+html.staging-ui.staging-compact-chat #viewDataAgent .agent-chat-header {
   display: none !important;
 }
 
@@ -1990,7 +1995,9 @@ html.staging-ui .nav-group {
 /* 聊天卡片：垂直居中、略微偏下 */
 html.staging-ui.staging-compact-chat #viewStrategyQuery .agent-chat-shell,
 html.staging-ui.staging-compact-chat #viewStrategyAudit .agent-chat-shell,
-html.staging-ui.staging-compact-chat #viewStrategyRenewal .agent-chat-shell {
+html.staging-ui.staging-compact-chat #viewDataAgent .agent-chat-shell,
+html.staging-ui.staging-compact-chat #viewStrategyRenewal .agent-chat-shell,
+html.staging-ui.staging-compact-chat #viewDataAgent .agent-chat-shell {
   justify-content: center !important;
 }
 
@@ -2014,7 +2021,9 @@ html.staging-ui.staging-compact-chat .chat-mod-panel {
 /* v12 · 正式环境：输入框固定红区底部；执行流程独立上方，互不影响 */
 html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyQuery .agent-chat-shell,
 html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .agent-chat-shell,
-html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .agent-chat-shell {
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewDataAgent .agent-chat-shell,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .agent-chat-shell,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewDataAgent .agent-chat-shell {
   position: relative !important;
   justify-content: flex-start !important;
   align-items: center !important;
@@ -2024,7 +2033,9 @@ html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .age
 /* ① 输入框：固定钉在红圈位置（底部居中），整体上移 40px；执行流程出现也不移动 */
 html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyQuery .chat-mod-panel,
 html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .chat-mod-panel,
-html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .chat-mod-panel {
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewDataAgent .chat-mod-panel,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .chat-mod-panel,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewDataAgent .chat-mod-panel {
   position: absolute !important;
   left: 50% !important;
   bottom: 96px !important;
@@ -2039,7 +2050,9 @@ html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .cha
 /* ② 执行流程：固定 1200×670，可上下滚动（输入框不动） */
 html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyQuery .module-flow-results,
 html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .module-flow-results,
-html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .module-flow-results {
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewDataAgent .module-flow-results,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .module-flow-results,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewDataAgent .module-flow-results {
   position: absolute !important;
   left: 50% !important;
   top: 12px !important;
@@ -2313,16 +2326,20 @@ html.staging-ui.staging-compact-chat .chat-mod-panel::after {
 }
 
 /* 审核卡片：让审核人下拉不被卡片裁剪 */
-html.staging-ui.staging-compact-chat #viewStrategyAudit .chat-mod-panel {
+html.staging-ui.staging-compact-chat #viewStrategyAudit .chat-mod-panel,
+html.staging-ui.staging-compact-chat #viewDataAgent .chat-mod-panel {
   overflow: visible !important;
 }
 
 html.staging-ui.staging-compact-chat #viewStrategyAudit .agent-chat-shell,
-html.staging-ui.staging-compact-chat #viewStrategyAudit:not(.hidden) {
+html.staging-ui.staging-compact-chat #viewDataAgent .agent-chat-shell,
+html.staging-ui.staging-compact-chat #viewStrategyAudit:not(.hidden),
+html.staging-ui.staging-compact-chat #viewDataAgent:not(.hidden) {
   overflow: visible !important;
 }
 
-html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-reviewer-dropdown {
+html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-reviewer-dropdown,
+html.staging-ui.staging-compact-chat #viewDataAgent .audit-reviewer-dropdown {
   z-index: 1400 !important;
   background: #ffffff !important;
   border: 1px solid rgba(16, 16, 16, 0.12) !important;
@@ -2423,7 +2440,8 @@ html.staging-ui.staging-compact-chat .chat-mod-panel .module-search-bar .audit-r
 
 /* 审核人搜索：列表向上展开 */
 html.staging-ui .audit-reviewer-dropdown,
-html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-reviewer-dropdown {
+html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-reviewer-dropdown,
+html.staging-ui.staging-compact-chat #viewDataAgent .audit-reviewer-dropdown {
   top: auto !important;
   bottom: calc(100% + 6px) !important;
   transform: translateY(4px) !important;
@@ -2431,13 +2449,16 @@ html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-reviewer-dropdown
 }
 
 html.staging-ui .audit-reviewer-combobox.open .audit-reviewer-dropdown,
-html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-reviewer-combobox.open .audit-reviewer-dropdown {
+html.staging-ui.staging-compact-chat #viewStrategyAudit .audit-reviewer-combobox.open .audit-reviewer-dropdown,
+html.staging-ui.staging-compact-chat #viewDataAgent .audit-reviewer-combobox.open .audit-reviewer-dropdown {
   transform: translateY(0) !important;
 }
 
 /* 审核下拉不被底部固定卡片裁切 */
 html.staging-ui.staging-compact-chat #viewStrategyAudit .chat-mod-panel,
-html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .agent-chat-shell {
+html.staging-ui.staging-compact-chat #viewDataAgent .chat-mod-panel,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .agent-chat-shell,
+html.staging-ui.staging-compact-chat:not(.staging-dev) #viewDataAgent .agent-chat-shell {
   overflow: visible !important;
 }
 
@@ -2548,7 +2569,9 @@ html.staging-ui .audit-creator-summary {
 
 html.staging-ui.staging-dev.staging-compact-chat #viewStrategyQuery .agent-chat-shell,
 html.staging-ui.staging-dev.staging-compact-chat #viewStrategyAudit .agent-chat-shell,
-html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .agent-chat-shell {
+html.staging-ui.staging-dev.staging-compact-chat #viewDataAgent .agent-chat-shell,
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .agent-chat-shell,
+html.staging-ui.staging-dev.staging-compact-chat #viewDataAgent .agent-chat-shell {
   justify-content: flex-start !important;
   align-items: center !important;
   padding: 0 !important;
@@ -2559,7 +2582,9 @@ html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .agent-cha
 /* 绿区 · 执行流程：固定 1200×670 + 滑动块 */
 html.staging-ui.staging-dev.staging-compact-chat #viewStrategyQuery .module-flow-results,
 html.staging-ui.staging-dev.staging-compact-chat #viewStrategyAudit .module-flow-results,
-html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .module-flow-results {
+html.staging-ui.staging-dev.staging-compact-chat #viewDataAgent .module-flow-results,
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .module-flow-results,
+html.staging-ui.staging-dev.staging-compact-chat #viewDataAgent .module-flow-results {
   flex: 0 0 auto !important;
   width: 1200px !important;
   max-width: calc(100% - 48px) !important;
@@ -2583,7 +2608,9 @@ html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .module-fl
 /* 无执行内容时不展现执行流程框 */
 html.staging-ui.staging-dev.staging-compact-chat #viewStrategyQuery .module-flow-results.is-empty,
 html.staging-ui.staging-dev.staging-compact-chat #viewStrategyAudit .module-flow-results.is-empty,
-html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .module-flow-results.is-empty {
+html.staging-ui.staging-dev.staging-compact-chat #viewDataAgent .module-flow-results.is-empty,
+html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .module-flow-results.is-empty,
+html.staging-ui.staging-dev.staging-compact-chat #viewDataAgent .module-flow-results.is-empty {
   display: none !important;
   height: 0 !important;
   max-height: 0 !important;
@@ -2956,29 +2983,49 @@ html.staging-ui #viewStrategyQuery .chat-mod-input,
 html.staging-ui #viewStrategyQuery .chat-mod-send,
 html.staging-ui #viewStrategyQuery .agent-chat-composer,
 html.staging-ui #viewStrategyAudit .chat-mod-input-shell,
+html.staging-ui #viewDataAgent .chat-mod-input-shell,
 html.staging-ui #viewStrategyAudit .chat-mod-input-glow,
+html.staging-ui #viewDataAgent .chat-mod-input-glow,
 html.staging-ui #viewStrategyAudit .chat-mod-input-inner,
+html.staging-ui #viewDataAgent .chat-mod-input-inner,
 html.staging-ui #viewStrategyAudit .chat-mod-input,
+html.staging-ui #viewDataAgent .chat-mod-input,
 html.staging-ui #viewStrategyAudit .chat-mod-send,
+html.staging-ui #viewDataAgent .chat-mod-send,
 html.staging-ui #viewStrategyAudit .agent-chat-composer,
+html.staging-ui #viewDataAgent .agent-chat-composer,
 html.staging-ui #viewStrategyRenewal .renewal-input-shell,
 html.staging-ui #viewStrategyRenewal .renewal-input-glow,
 html.staging-ui #viewStrategyRenewal .renewal-input-inner,
 html.staging-ui #viewStrategyRenewal .renewal-chat-input,
 html.staging-ui #viewStrategyRenewal .renewal-send-btn,
 html.staging-ui #viewStrategyRenewal .agent-chat-composer,
+html.staging-ui #viewDataAgent .chat-mod-input-shell,
+html.staging-ui #viewDataAgent .chat-mod-input-glow,
+html.staging-ui #viewDataAgent .chat-mod-input-inner,
+html.staging-ui #viewDataAgent .chat-mod-input,
+html.staging-ui #viewDataAgent .chat-mod-send,
+html.staging-ui #viewDataAgent .agent-chat-composer,
 html.staging-ui #viewStrategyQuery .chat-mod-input-glow:focus-within,
 html.staging-ui #viewStrategyAudit .chat-mod-input-glow:focus-within,
+html.staging-ui #viewDataAgent .chat-mod-input-glow:focus-within,
 html.staging-ui #viewStrategyRenewal .renewal-input-glow:focus-within,
+html.staging-ui #viewDataAgent .chat-mod-input-glow:focus-within,
 html.staging-ui #viewStrategyQuery .agent-chat-composer:focus-within,
 html.staging-ui #viewStrategyAudit .agent-chat-composer:focus-within,
+html.staging-ui #viewDataAgent .agent-chat-composer:focus-within,
 html.staging-ui #viewStrategyRenewal .agent-chat-composer:focus-within,
+html.staging-ui #viewDataAgent .agent-chat-composer:focus-within,
 html.staging-ui #viewStrategyQuery .chat-mod-send:hover,
 html.staging-ui #viewStrategyQuery .chat-mod-send:active,
 html.staging-ui #viewStrategyAudit .chat-mod-send:hover,
+html.staging-ui #viewDataAgent .chat-mod-send:hover,
 html.staging-ui #viewStrategyAudit .chat-mod-send:active,
+html.staging-ui #viewDataAgent .chat-mod-send:active,
 html.staging-ui #viewStrategyRenewal .renewal-send-btn:hover,
-html.staging-ui #viewStrategyRenewal .renewal-send-btn:active {
+html.staging-ui #viewStrategyRenewal .renewal-send-btn:active,
+html.staging-ui #viewDataAgent .chat-mod-send:hover,
+html.staging-ui #viewDataAgent .chat-mod-send:active {
   transform: none !important;
   scale: 1 !important;
   filter: none !important;
@@ -2987,32 +3034,46 @@ html.staging-ui #viewStrategyRenewal .renewal-send-btn:active {
 
 html.staging-ui #viewStrategyQuery .chat-mod-input-shell,
 html.staging-ui #viewStrategyAudit .chat-mod-input-shell,
+html.staging-ui #viewDataAgent .chat-mod-input-shell,
 html.staging-ui #viewStrategyRenewal .renewal-input-shell,
+html.staging-ui #viewDataAgent .chat-mod-input-shell,
 html.staging-ui #viewStrategyQuery .chat-mod-input-glow,
 html.staging-ui #viewStrategyAudit .chat-mod-input-glow,
+html.staging-ui #viewDataAgent .chat-mod-input-glow,
 html.staging-ui #viewStrategyRenewal .renewal-input-glow,
+html.staging-ui #viewDataAgent .chat-mod-input-glow,
 html.staging-ui #viewStrategyQuery .agent-chat-composer,
 html.staging-ui #viewStrategyAudit .agent-chat-composer,
-html.staging-ui #viewStrategyRenewal .agent-chat-composer {
+html.staging-ui #viewDataAgent .agent-chat-composer,
+html.staging-ui #viewStrategyRenewal .agent-chat-composer,
+html.staging-ui #viewDataAgent .agent-chat-composer {
   transition: border-color 0.16s ease !important;
 }
 
 /* 选中：只改边框颜色，去掉外扩光晕（否则看起来像放大） */
 html.staging-ui #viewStrategyQuery .chat-mod-input-glow,
 html.staging-ui #viewStrategyAudit .chat-mod-input-glow,
+html.staging-ui #viewDataAgent .chat-mod-input-glow,
 html.staging-ui #viewStrategyRenewal .renewal-input-glow,
+html.staging-ui #viewDataAgent .chat-mod-input-glow,
 html.staging-ui.staging-compact-chat #viewStrategyQuery .chat-mod-panel .chat-mod-input-glow,
 html.staging-ui.staging-compact-chat #viewStrategyAudit .chat-mod-panel .chat-mod-input-glow,
-html.staging-ui.staging-compact-chat #viewStrategyRenewal .chat-mod-panel .renewal-input-glow {
+html.staging-ui.staging-compact-chat #viewDataAgent .chat-mod-panel .chat-mod-input-glow,
+html.staging-ui.staging-compact-chat #viewStrategyRenewal .chat-mod-panel .renewal-input-glow,
+html.staging-ui.staging-compact-chat #viewDataAgent .chat-mod-panel .chat-mod-input-glow {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65) !important;
 }
 
 html.staging-ui #viewStrategyQuery .chat-mod-input-glow:focus-within,
 html.staging-ui #viewStrategyAudit .chat-mod-input-glow:focus-within,
+html.staging-ui #viewDataAgent .chat-mod-input-glow:focus-within,
 html.staging-ui #viewStrategyRenewal .renewal-input-glow:focus-within,
+html.staging-ui #viewDataAgent .chat-mod-input-glow:focus-within,
 html.staging-ui.staging-compact-chat #viewStrategyQuery .chat-mod-panel .chat-mod-input-glow:focus-within,
 html.staging-ui.staging-compact-chat #viewStrategyAudit .chat-mod-panel .chat-mod-input-glow:focus-within,
-html.staging-ui.staging-compact-chat #viewStrategyRenewal .chat-mod-panel .renewal-input-glow:focus-within {
+html.staging-ui.staging-compact-chat #viewDataAgent .chat-mod-panel .chat-mod-input-glow:focus-within,
+html.staging-ui.staging-compact-chat #viewStrategyRenewal .chat-mod-panel .renewal-input-glow:focus-within,
+html.staging-ui.staging-compact-chat #viewDataAgent .chat-mod-panel .chat-mod-input-glow:focus-within {
   border-color: rgba(59, 130, 246, 0.55) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
   background: rgba(255, 255, 255, 0.52) !important;
@@ -3022,13 +3083,19 @@ html.staging-ui.staging-compact-chat #viewStrategyRenewal .chat-mod-panel .renew
 /* 禁止 focus-within 改 padding / 宽度（看起来像整体放大） */
 html.staging-ui #viewStrategyQuery .agent-chat-composer.chat-mod-composer:focus-within,
 html.staging-ui #viewStrategyAudit .agent-chat-composer.chat-mod-composer:focus-within,
+html.staging-ui #viewDataAgent .agent-chat-composer.chat-mod-composer:focus-within,
 html.staging-ui #viewStrategyRenewal .agent-chat-composer.renewal-composer:focus-within,
+html.staging-ui #viewDataAgent .agent-chat-composer.chat-mod-composer:focus-within,
 html.staging-ui #viewStrategyQuery .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
 html.staging-ui #viewStrategyAudit .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
+html.staging-ui #viewDataAgent .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
 html.staging-ui #viewStrategyRenewal .agent-chat-shell .agent-chat-composer.renewal-composer:focus-within,
+html.staging-ui #viewDataAgent .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
 html.github-ui.staging-ui #viewStrategyQuery .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
 html.github-ui.staging-ui #viewStrategyAudit .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
-html.github-ui.staging-ui #viewStrategyRenewal .agent-chat-shell .agent-chat-composer.renewal-composer:focus-within {
+html.github-ui.staging-ui #viewDataAgent .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within,
+html.github-ui.staging-ui #viewStrategyRenewal .agent-chat-shell .agent-chat-composer.renewal-composer:focus-within,
+html.github-ui.staging-ui #viewDataAgent .agent-chat-shell .agent-chat-composer.chat-mod-composer:focus-within {
   max-width: none !important;
   width: 100% !important;
   padding: 0 12px 14px !important;
@@ -3039,9 +3106,13 @@ html.github-ui.staging-ui #viewStrategyRenewal .agent-chat-shell .agent-chat-com
 
 html.staging-ui #viewStrategyQuery .chat-mod-input:focus,
 html.staging-ui #viewStrategyAudit .chat-mod-input:focus,
+html.staging-ui #viewDataAgent .chat-mod-input:focus,
 html.staging-ui #viewStrategyRenewal .renewal-chat-input:focus,
+html.staging-ui #viewDataAgent .chat-mod-input:focus,
 html.staging-ui #viewStrategyQuery .agent-chat-input:focus,
-html.staging-ui #viewStrategyAudit .agent-chat-input:focus {
+html.staging-ui #viewStrategyAudit .agent-chat-input:focus,
+html.staging-ui #viewDataAgent .agent-chat-input:focus,
+html.staging-ui #viewDataAgent .agent-chat-input:focus {
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
@@ -3053,14 +3124,18 @@ html.staging-ui #viewStrategyAudit .agent-chat-input:focus {
  * ═══════════════════════════════════════════════════════ */
 html.staging-ui #viewStrategyQuery .chat-mod-input::placeholder,
 html.staging-ui #viewStrategyAudit .chat-mod-input::placeholder,
-html.staging-ui #viewStrategyRenewal .renewal-chat-input::placeholder {
+html.staging-ui #viewDataAgent .chat-mod-input::placeholder,
+html.staging-ui #viewStrategyRenewal .renewal-chat-input::placeholder,
+html.staging-ui #viewDataAgent .chat-mod-input::placeholder {
   color: transparent !important;
   opacity: 0 !important;
 }
 
 html.staging-ui #viewStrategyQuery .chat-mod-input-inner .module-input-hint,
 html.staging-ui #viewStrategyAudit .chat-mod-input-inner .module-input-hint,
-html.staging-ui #viewStrategyRenewal .renewal-input-inner .module-input-hint {
+html.staging-ui #viewDataAgent .chat-mod-input-inner .module-input-hint,
+html.staging-ui #viewStrategyRenewal .renewal-input-inner .module-input-hint,
+html.staging-ui #viewDataAgent .chat-mod-input-inner .module-input-hint {
   display: none !important;
 }
 
@@ -4763,7 +4838,9 @@ html.staging-ui .shield-plat-log-msg {
   /* 三模块壳：纵向排布，避免绝对定位互相遮挡 */
   html.staging-ui.staging-compact-chat #viewStrategyQuery .agent-chat-shell,
   html.staging-ui.staging-compact-chat #viewStrategyAudit .agent-chat-shell,
-  html.staging-ui.staging-compact-chat #viewStrategyRenewal .agent-chat-shell {
+  html.staging-ui.staging-compact-chat #viewDataAgent .agent-chat-shell,
+  html.staging-ui.staging-compact-chat #viewStrategyRenewal .agent-chat-shell,
+  html.staging-ui.staging-compact-chat #viewDataAgent .agent-chat-shell {
     overflow: hidden !important;
     padding: 8px !important;
     box-sizing: border-box !important;
@@ -4771,7 +4848,9 @@ html.staging-ui .shield-plat-log-msg {
 
   html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyQuery .chat-mod-panel,
   html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .chat-mod-panel,
+  html.staging-ui.staging-compact-chat:not(.staging-dev) #viewDataAgent .chat-mod-panel,
   html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .chat-mod-panel,
+  html.staging-ui.staging-compact-chat:not(.staging-dev) #viewDataAgent .chat-mod-panel,
   html.staging-ui.staging-compact-chat .chat-mod-panel.module-input-block {
     position: absolute !important;
     left: 50% !important;
@@ -4788,11 +4867,15 @@ html.staging-ui .shield-plat-log-msg {
   /* 执行流程：取消桌面 1200×670；底部预留下方输入卡，避免叠压 */
   html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyQuery .module-flow-results,
   html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyAudit .module-flow-results,
+  html.staging-ui.staging-compact-chat:not(.staging-dev) #viewDataAgent .module-flow-results,
   html.staging-ui.staging-compact-chat:not(.staging-dev) #viewStrategyRenewal .module-flow-results,
+  html.staging-ui.staging-compact-chat:not(.staging-dev) #viewDataAgent .module-flow-results,
   html.staging-ui.staging-compact-chat .module-flow-results:not(.is-empty):not([hidden]),
   html.staging-ui.staging-dev.staging-compact-chat #viewStrategyQuery .module-flow-results,
   html.staging-ui.staging-dev.staging-compact-chat #viewStrategyAudit .module-flow-results,
-  html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .module-flow-results {
+  html.staging-ui.staging-dev.staging-compact-chat #viewDataAgent .module-flow-results,
+  html.staging-ui.staging-dev.staging-compact-chat #viewStrategyRenewal .module-flow-results,
+  html.staging-ui.staging-dev.staging-compact-chat #viewDataAgent .module-flow-results {
     position: absolute !important;
     left: 50% !important;
     top: 8px !important;

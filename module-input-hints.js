@@ -21,6 +21,10 @@
       inputId: "renewalChatInput",
       text: "输入示例：策略ID（空格分隔，如 13938 14619）；或粘贴到期提醒（自动抽取ID）",
     },
+    viewDataAgent: {
+      inputId: "daChatInput",
+      text: "用自然语言提问，例如：最近 7 天联盟消耗 Top 媒体",
+    },
   };
 
   function clearInnerHints(input) {

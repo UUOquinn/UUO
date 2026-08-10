@@ -82,6 +82,11 @@
       label: "/api/strategy/meta",
       path: "/api/strategy/meta",
     },
+    viewDataAgent: {
+      key: "dataagent",
+      label: "/api/dataagent/status",
+      path: "/api/dataagent/status",
+    },
   };
 
   const VIEW_IDS = Object.keys(VIEW_CHECK);
