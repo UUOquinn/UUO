@@ -1,6 +1,6 @@
 /**
- * Data Agent — 与策略查询同款壳：输入框 + API 服务状态
- * 走 /api/dataagent/chat · /api/dataagent/status（无 Cookie 弹窗 / 无额外按钮）
+ * Data Agent — 布局对齐策略审核：仅输入框 + API 服务状态
+ * 无 Cookie / 新会话 / 顶栏徽标 / 欢迎说明
  */
 (function () {
   "use strict";
@@ -23,13 +23,6 @@
 
   function getMessagesEl() {
     return document.getElementById("daChatMessages");
-  }
-
-  function setBadge(text, ok) {
-    const badge = document.getElementById("daMetaBadge");
-    if (!badge) return;
-    badge.textContent = text;
-    badge.classList.toggle("err", ok === false);
   }
 
   function scrollChatToBottom() {
@@ -75,26 +68,6 @@
     return h;
   }
 
-  async function refreshStatus() {
-    try {
-      const resp = await fetch(`${API_BASE}/api/dataagent/status`, {
-        headers: headers(false),
-        signal: AbortSignal.timeout(12000),
-      });
-      const result = await resp.json().catch(() => ({}));
-      const d = result.data || {};
-      if (resp.ok && (d.loggedIn || d.ok)) {
-        setBadge(d.agentName || d.displayName || "已连接", true);
-      } else if (resp.status === 404) {
-        setBadge("接口未接入", false);
-      } else {
-        setBadge(d.hint || result.message || result.error || "未登录", false);
-      }
-    } catch (e) {
-      setBadge("状态检查失败", false);
-    }
-  }
-
   async function sendChat(text) {
     const question = String(text || "").trim();
     if (!question || state.loading) return;
@@ -124,7 +97,6 @@
           if (typeof window.markCookieExpired === "function") window.markCookieExpired();
         }
         appendMessage("assistant", `<p class="agent-muted">${escapeHtml(err)}</p>`);
-        setBadge(String(err), false);
         return;
       }
 
@@ -132,11 +104,9 @@
       if (d.conversationId) state.conversationId = d.conversationId;
       const answer = String(d.answer || "").trim() || "（空回答）";
       appendMessage("assistant", `<p>${escapeHtml(answer).replace(/\n/g, "<br>")}</p>`);
-      setBadge(d.agentName || "Data Agent", true);
     } catch (e) {
       clearThinking();
       appendMessage("assistant", `<p class="agent-muted">${escapeHtml(e.message || e)}</p>`);
-      setBadge("请求失败", false);
     } finally {
       state.loading = false;
     }
@@ -158,6 +128,5 @@
 
   window.onDataAgentViewEnter = function onDataAgentViewEnter() {
     bindOnce();
-    refreshStatus();
   };
 })();
