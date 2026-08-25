@@ -2,7 +2,7 @@
 
 内网策略运营工作台：浏览器只打本机服务，由 Python 代理层统一对接上游运营 / 数据平台。
 
-[功能矩阵](#功能矩阵) · [架构](#架构) · [HTTP API](docs/API.md) · [启动](#本地启动)
+[功能矩阵](#功能矩阵) · [架构](#架构) · [HTTP API](docs/API.md) · [Agent Skills](#agent-skills) · [启动](#本地启动)
 
 ---
 
@@ -123,6 +123,22 @@ export PORT=3000
 
 ---
 
+## Agent Skills
+
+仓库内可复用的 Cursor Agent 技能（契约 + 脚本；凭证不上库）：
+
+| Skill | 说明 |
+|-------|------|
+| [ams-default-contact](.agents/skills/ams-default-contact/) | 腾讯广告 AMS 批量绑定「账户联系人」——API 优先，禁止浏览器逐条点 |
+
+入口：[SKILL.md](.agents/skills/ams-default-contact/SKILL.md) · [API.md](.agents/skills/ams-default-contact/API.md) · [`bind-contact.js`](.agents/skills/ams-default-contact/scripts/bind-contact.js)
+
+```bash
+cd .agents/skills/ams-default-contact/scripts
+cp api.example.json api.json   # 本机填 Cookie，勿提交
+node bind-contact.js --dry-run
+```
+
 ## 仓库结构
 
 ```
@@ -130,6 +146,7 @@ index.html / *.js / *.css     前端模块
 server/app.py                 HTTP 入口与路由
 server/orient_browser.py      Playwright 代理
 server/modules/               查询 · 审核 · 延期 · 定投 · 屏蔽 · 数据集 …
+.agents/skills/               Cursor Agent Skills（如 ams-default-contact）
 guardian.sh                   生产守护
 scripts/                      启动 / 同步 / 运维脚本
 docs/                         API · Orient 契约 · 启动约定（地址已脱敏）
